@@ -7,151 +7,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --franca-green: #7DE08D;
-            --franca-green-hover: #6bc97a;
-            --franca-dark: #081534;
-            --franca-dark-light: #1a2b52;
-        }
-
+        :root { --franca-green: #7DE08D; --franca-dark: #081534; }
         html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
-
-        .blob {
-            position: fixed;
-            filter: blur(80px);
-            z-index: -1;
-            opacity: 0.6;
-            animation: float 10s ease-in-out infinite;
-        }
-
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #dcfce3; animation-delay: 0s; }
+        .blob { position: fixed; filter: blur(80px); z-index: -1; opacity: 0.6; animation: float 10s ease-in-out infinite; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #dcfce3; }
         .blob-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #e0f2fe; animation-delay: 2s; }
         .blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: #f0fdf4; animation-delay: 4s; }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, 40px); }
-        }
-
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, 40px); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        .custom-input {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.75rem;
-            font-size: 0.95rem;
-            color: #1e293b;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
-        }
-
+        .custom-input { width: 100%; padding: 1rem 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; color: #1e293b; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; }
         .custom-input:hover { border-color: #cbd5e1; background-color: #fff; }
-
-        .custom-input:focus {
-            outline: none;
-            background-color: #fff;
-            border-color: #7DE08D;
-            box-shadow: 0 0 0 4px rgba(125, 224, 141, 0.15);
-            transform: translateY(-1px);
-        }
-
+        .custom-input:focus { outline: none; background-color: #fff; border-color: #7DE08D; box-shadow: 0 0 0 4px rgba(125, 224, 141, 0.15); transform: translateY(-1px); }
         .custom-input.error { border-color: #fda4af; background-color: #fff1f2; }
-
-        label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #475569;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(8, 21, 52, 0.05);
-        }
-
-        .btn-premium {
-            background: #081534;
-            color: white;
-            font-weight: 600;
-            padding: 1rem 2rem;
-            border-radius: 0.75rem;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-            cursor: pointer;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .btn-premium:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(8, 21, 52, 0.3);
-            background: #0a1b42;
-        }
-
-        .btn-premium:active:not(:disabled) { transform: translateY(0); }
+        label { font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem; display: block; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(8, 21, 52, 0.05); }
+        .btn-premium { background: #081534; color: white; font-weight: 600; padding: 1rem 2rem; border-radius: 0.75rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; cursor: pointer; border: none; font-size: 1rem; }
+        .btn-premium:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(8, 21, 52, 0.3); background: #0a1b42; }
         .btn-premium:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        select.custom-input {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 3rem;
-        }
-
-        .error-msg {
-            color: #e11d48;
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
-            display: none;
-        }
-
+        select.custom-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem; }
+        .error-msg { color: #e11d48; font-size: 0.8rem; margin-top: 0.25rem; display: none; }
         .error-msg.show { display: block; }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            width: 20px; height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        .success-icon {
-            width: 80px; height: 80px;
-            background: #f0fdf4;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .spinner-dark { width: 24px; height: 24px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #7DE08D; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 2rem auto; }
+        .success-icon { width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+        .client-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-top: 0.5rem; }
+        .client-info p { font-size: 0.85rem; color: #475569; margin: 0.25rem 0; }
+        .client-info strong { color: #1e293b; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-white via-slate-50 to-blue-50">
@@ -163,7 +48,6 @@
         <main class="flex-1 px-4 py-12 md:py-20 max-w-2xl mx-auto w-full">
             <div id="app"></div>
         </main>
-
         <footer class="border-t border-slate-100 bg-white/50 backdrop-blur-sm py-6 text-center text-sm text-slate-500">
             <p>&copy; Franca Assessoria. Uso interno.</p>
         </footer>
@@ -171,14 +55,127 @@
 
     <script>
         const WEBHOOK_URL = 'https://webhooks.francaassessoria.com/webhook/setup-cliente';
+        const SHEET_ID = '1txY9K4xIWEL8BYWhVoPr33GYPlp0sK4nm3Dm63lYFq8';
+        const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
+        let clientes = [];
         let isLoading = false;
+        let lastSubmittedData = null;
 
+        // === CARREGAR CLIENTES DA PLANILHA ===
+        async function carregarClientes() {
+            document.getElementById('app').innerHTML = `
+                <div class="text-center py-20">
+                    <div class="spinner-dark"></div>
+                    <p class="text-slate-500 mt-4">Carregando clientes...</p>
+                </div>`;
+
+            try {
+                const response = await fetch(GVIZ_URL);
+                const csv = await response.text();
+                const linhas = parseCSV(csv);
+
+                if (linhas.length < 2) {
+                    clientes = [];
+                    render();
+                    return;
+                }
+
+                const headers = linhas[0];
+                const colNome = headers.indexOf('Razão Social / Nome Completo');
+                const colTAG = headers.indexOf('TAG');
+                const colTipo = headers.indexOf('Tipo');
+                const colCNPJ = headers.indexOf('CNPJ / CPF');
+                const colEmail = headers.indexOf('E-mail');
+                const colSocio = headers.indexOf('Nome do Sócio/Responsável');
+                const colCelular = headers.indexOf('Celular');
+
+                clientes = [];
+                for (let i = 1; i < linhas.length; i++) {
+                    const row = linhas[i];
+                    const nome = (row[colNome] || '').trim();
+                    const tag = (row[colTAG] || '').trim();
+
+                    // Só mostra clientes que TÊM nome mas NÃO têm TAG (setup pendente)
+                    if (nome && !tag) {
+                        clientes.push({
+                            rowNumber: i + 1, // 1-based, contando header
+                            nome: nome,
+                            tipo: (row[colTipo] || '').trim(),
+                            cnpjCpf: (row[colCNPJ] || '').trim(),
+                            email: (row[colEmail] || '').trim(),
+                            socio: (row[colSocio] || '').trim(),
+                            celular: (row[colCelular] || '').trim()
+                        });
+                    }
+                }
+
+                render();
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center">
+                        <p class="text-red-500 mb-4">Erro ao carregar clientes da planilha.</p>
+                        <button onclick="carregarClientes()" class="btn-premium">Tentar novamente</button>
+                    </div>`;
+            }
+        }
+
+        // === PARSE CSV ===
+        function parseCSV(csv) {
+            const linhas = [];
+            let current = [];
+            let field = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < csv.length; i++) {
+                const c = csv[i];
+                if (inQuotes) {
+                    if (c === '"' && csv[i + 1] === '"') { field += '"'; i++; }
+                    else if (c === '"') { inQuotes = false; }
+                    else { field += c; }
+                } else {
+                    if (c === '"') { inQuotes = true; }
+                    else if (c === ',') { current.push(field); field = ''; }
+                    else if (c === '\n' || (c === '\r' && csv[i + 1] === '\n')) {
+                        current.push(field); field = '';
+                        linhas.push(current); current = [];
+                        if (c === '\r') i++;
+                    } else { field += c; }
+                }
+            }
+            if (field || current.length) { current.push(field); linhas.push(current); }
+            return linhas;
+        }
+
+        // === RENDER ===
         function render() {
             document.getElementById('app').innerHTML = renderForm();
+            // Setup event listener pro select de cliente
+            const sel = document.getElementById('cliente');
+            if (sel) {
+                sel.addEventListener('change', function() {
+                    const idx = this.value;
+                    const info = document.getElementById('client-info');
+                    if (idx === '') { info.style.display = 'none'; return; }
+                    const c = clientes[idx];
+                    info.style.display = 'block';
+                    info.innerHTML = `
+                        <p><strong>Tipo:</strong> ${c.tipo || '—'}</p>
+                        <p><strong>CNPJ/CPF:</strong> ${c.cnpjCpf || '—'}</p>
+                        <p><strong>E-mail:</strong> ${c.email || '—'}</p>
+                        ${c.socio ? `<p><strong>Responsável:</strong> ${c.socio}</p>` : ''}
+                        ${c.celular ? `<p><strong>Celular:</strong> ${c.celular}</p>` : ''}
+                    `;
+                });
+            }
         }
 
         function renderForm() {
+            const clienteOptions = clientes.length === 0
+                ? '<option value="" disabled selected>Nenhum cliente pendente de setup</option>'
+                : '<option value="" disabled selected>Selecione o cliente</option>' +
+                  clientes.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
+
             return `
                 <div class="animate-slide-up">
                     <div class="text-center mb-10">
@@ -187,22 +184,34 @@
                             <span class="text-sm text-slate-600 font-medium">Setup Interno</span>
                         </div>
                         <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-3">Novo Cliente</h1>
-                        <p class="text-slate-500">Preencha os dados operacionais para criar o setup completo.</p>
+                        <p class="text-slate-500">Selecione o cliente e preencha os dados operacionais.</p>
                     </div>
 
                     <div class="glass-card rounded-2xl p-8 md:p-10">
                         <form id="setupForm" onsubmit="handleSubmit(event)">
                             <div class="space-y-5">
-                                <div>
-                                    <label for="nome">Nome do Cliente <span class="text-red-400">*</span></label>
-                                    <input type="text" id="nome" class="custom-input" placeholder="Como vai aparecer no grupo" required>
-                                    <p class="error-msg" id="nome-error">Campo obrigatório</p>
-                                </div>
 
                                 <div>
-                                    <label for="tag">TAG <span class="text-red-400">*</span></label>
-                                    <input type="text" id="tag" class="custom-input" placeholder="Ex: LIVEN, REALP, 3HAUS" required style="text-transform: uppercase;">
-                                    <p class="error-msg" id="tag-error">Campo obrigatório</p>
+                                    <label for="cliente">Cliente <span class="text-red-400">*</span></label>
+                                    <select id="cliente" class="custom-input" required>
+                                        ${clienteOptions}
+                                    </select>
+                                    <div id="client-info" class="client-info" style="display:none;"></div>
+                                    <p class="error-msg" id="cliente-error">Selecione um cliente</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="nomeGrupo">Nome no Grupo <span class="text-red-400">*</span></label>
+                                        <input type="text" id="nomeGrupo" class="custom-input" placeholder="Como aparece no grupo WhatsApp" required>
+                                        <p class="error-msg" id="nomeGrupo-error">Campo obrigatório</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="tag">TAG <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tag" class="custom-input" placeholder="Ex: LIVEN, REALP" required style="text-transform: uppercase;">
+                                        <p class="error-msg" id="tag-error">Campo obrigatório</p>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -247,29 +256,29 @@
 
                                 <div>
                                     <label>Serviços Contratados <span class="text-red-400">*</span></label>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2" id="servicos-container">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Tráfego Pago" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Tráfego Pago" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Tráfego Pago</span>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Produção de Conteúdo" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Produção de Conteúdo" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Produção de Conteúdo</span>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Automações" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Automações" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Automações</span>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Criação de Páginas" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Criação de Páginas" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Criação de Páginas</span>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Edição de Anúncios" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Edição de Anúncios" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Edição de Anúncios</span>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
-                                            <input type="checkbox" name="servicos" value="Implementação Produto Digital" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <input type="checkbox" name="servicos" value="Implementação Produto Digital" class="w-4 h-4 accent-[#7DE08D]">
                                             <span class="text-sm text-slate-700">Implementação Produto Digital</span>
                                         </label>
                                     </div>
@@ -278,7 +287,7 @@
                             </div>
 
                             <div class="mt-8">
-                                <button type="submit" class="btn-premium" id="submitBtn" ${isLoading ? 'disabled' : ''}>
+                                <button type="submit" class="btn-premium" id="submitBtn" ${isLoading || clientes.length === 0 ? 'disabled' : ''}>
                                     ${isLoading ? '<div class="spinner"></div> Criando setup...' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> Criar Setup do Cliente'}
                                 </button>
                             </div>
@@ -287,8 +296,6 @@
                 </div>
             `;
         }
-
-        let lastSubmittedData = null;
 
         function renderSuccess(data) {
             lastSubmittedData = data;
@@ -302,11 +309,12 @@
                             </svg>
                         </div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-2">Setup criado com sucesso!</h2>
-                        <p class="text-slate-500 mb-6">O cliente <strong>${data.nome}</strong> (${data.tag}) foi configurado.</p>
+                        <p class="text-slate-500 mb-6">O cliente <strong>${data.nomeGrupo}</strong> (${data.tag}) foi configurado.</p>
 
                         <div class="bg-slate-50 rounded-xl p-5 text-left mb-6 space-y-2">
                             <p class="text-sm text-slate-600"><strong>Planilha de clientes:</strong> Adicionado</p>
                             <p class="text-sm text-slate-600"><strong>Planilha de relacionamento:</strong> Adicionado como Ativo</p>
+                            <p class="text-sm text-slate-600"><strong>Planilha de onboarding:</strong> Atualizada</p>
                             <p class="text-sm text-slate-600"><strong>Responsável:</strong> ${data.responsavel}</p>
                         </div>
 
@@ -316,7 +324,9 @@
                                 Criar Grupo WhatsApp
                             </button>
 
-                            <button onclick="resetForm()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
+                            <div id="grupo-participantes" style="display:none;"></div>
+
+                            <button onclick="carregarClientes()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                                 Cadastrar outro cliente
                             </button>
@@ -326,28 +336,84 @@
             `;
         }
 
-        async function criarGrupo() {
+        const EQUIPE = [
+            { nome: 'Gabriel', numero: '5521991097451' },
+            { nome: 'Bruna', numero: '5521996393929' },
+            { nome: 'Leo', numero: '5521964401348' },
+            { nome: 'Guilherme', numero: '5521964535810' },
+            { nome: 'Davidson', numero: '5521990268273' }
+        ];
+
+        function criarGrupo() {
             const btn = document.getElementById('btnGrupo');
+            btn.style.display = 'none';
+
+            const container = document.getElementById('grupo-participantes');
+            const clienteNumero = lastSubmittedData.whatsapp;
+            const clienteNome = lastSubmittedData.nomeGrupo;
+
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="bg-slate-50 rounded-xl p-5 text-left mb-4">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Selecione os participantes do grupo:</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-2 rounded-lg bg-green-50 border border-green-200">
+                            <input type="checkbox" name="participantes" value="${clienteNumero}" checked class="w-4 h-4 accent-[#7DE08D]">
+                            <span class="text-sm text-slate-700">${clienteNome} <span class="text-slate-400">(cliente)</span></span>
+                        </label>
+                        ${EQUIPE.map(m => `
+                        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 transition-all">
+                            <input type="checkbox" name="participantes" value="${m.numero}" checked class="w-4 h-4 accent-[#7DE08D]">
+                            <span class="text-sm text-slate-700">${m.nome} <span class="text-slate-400">(equipe)</span></span>
+                        </label>`).join('')}
+                    </div>
+                </div>
+                <button onclick="confirmarGrupo()" class="btn-premium" id="btnConfirmarGrupo" style="background: #16a34a;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Confirmar e Criar Grupo
+                </button>
+            `;
+        }
+
+        async function confirmarGrupo() {
+            const btn = document.getElementById('btnConfirmarGrupo');
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner"></div> Criando grupo...';
 
+            const participantes = Array.from(document.querySelectorAll('input[name="participantes"]:checked')).map(el => el.value);
+
+            if (participantes.length === 0) {
+                btn.style.background = '#ef4444';
+                btn.innerHTML = 'Selecione ao menos um participante';
+                btn.disabled = false;
+                return;
+            }
+
             try {
+                const payload = {
+                    ...lastSubmittedData,
+                    participantes: participantes
+                };
+
                 const response = await fetch(WEBHOOK_URL + '-grupo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(lastSubmittedData)
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) throw new Error('Erro');
 
-                btn.style.background = '#22c55e';
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Grupo criado!';
-                btn.disabled = true;
+                const container = document.getElementById('grupo-participantes');
+                container.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <p class="text-sm font-semibold text-green-700">Grupo criado com ${participantes.length} participantes!</p>
+                    </div>
+                `;
             } catch (error) {
                 btn.style.background = '#ef4444';
                 btn.innerHTML = 'Erro ao criar grupo — tente novamente';
                 btn.disabled = false;
-                btn.onclick = criarGrupo;
             }
         }
 
@@ -362,25 +428,26 @@
                         </div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-2">Erro ao criar setup</h2>
                         <p class="text-slate-500 mb-6">${message}</p>
-
-                        <button onclick="resetForm()" class="btn-premium">
-                            Tentar novamente
-                        </button>
+                        <button onclick="carregarClientes()" class="btn-premium">Tentar novamente</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
         async function handleSubmit(e) {
             e.preventDefault();
 
-            // Clear errors
             document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('.custom-input').forEach(el => el.classList.remove('error'));
 
-            // Get values
+            const clienteIdx = document.getElementById('cliente').value;
+            const cliente = clientes[clienteIdx];
+
             const data = {
-                nome: document.getElementById('nome').value.trim(),
+                // Dados do cliente selecionado
+                clienteNome: cliente.nome,
+                rowNumber: cliente.rowNumber,
+                // Dados operacionais
+                nomeGrupo: document.getElementById('nomeGrupo').value.trim(),
                 tag: document.getElementById('tag').value.trim().toUpperCase(),
                 whatsapp: document.getElementById('whatsapp').value.trim().replace(/\D/g, ''),
                 segmento: document.getElementById('segmento').value,
@@ -390,10 +457,9 @@
                 timestamp: new Date().toISOString()
             };
 
-            // Validate
             let hasError = false;
-
-            if (!data.nome) { showError('nome'); hasError = true; }
+            if (clienteIdx === '' || clienteIdx === null) { showError('cliente'); hasError = true; }
+            if (!data.nomeGrupo) { showError('nomeGrupo'); hasError = true; }
             if (!data.tag) { showError('tag'); hasError = true; }
             if (!data.whatsapp || data.whatsapp.length < 12) { showError('whatsapp'); hasError = true; }
             if (!data.segmento) { showError('segmento'); hasError = true; }
@@ -403,7 +469,6 @@
 
             if (hasError) return;
 
-            // Submit
             isLoading = true;
             render();
 
@@ -425,16 +490,14 @@
         }
 
         function showError(field) {
-            document.getElementById(field).classList.add('error');
-            document.getElementById(field + '-error').classList.add('show');
+            const el = document.getElementById(field);
+            if (el) el.classList.add('error');
+            const err = document.getElementById(field + '-error');
+            if (err) err.classList.add('show');
         }
 
-        function resetForm() {
-            isLoading = false;
-            render();
-        }
-
-        render();
+        // Iniciar carregando clientes
+        carregarClientes();
     </script>
 </body>
 </html>
