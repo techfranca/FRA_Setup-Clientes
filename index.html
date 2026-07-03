@@ -288,7 +288,10 @@
             `;
         }
 
+        let lastSubmittedData = null;
+
         function renderSuccess(data) {
+            lastSubmittedData = data;
             return `
                 <div class="animate-slide-up">
                     <div class="glass-card rounded-2xl p-8 md:p-10 text-center">
@@ -302,19 +305,50 @@
                         <p class="text-slate-500 mb-6">O cliente <strong>${data.nome}</strong> (${data.tag}) foi configurado.</p>
 
                         <div class="bg-slate-50 rounded-xl p-5 text-left mb-6 space-y-2">
-                            <p class="text-sm text-slate-600"><strong>Grupo WhatsApp:</strong> Criado com equipe + cliente</p>
                             <p class="text-sm text-slate-600"><strong>Planilha de clientes:</strong> Adicionado</p>
                             <p class="text-sm text-slate-600"><strong>Planilha de relacionamento:</strong> Adicionado como Ativo</p>
                             <p class="text-sm text-slate-600"><strong>Responsável:</strong> ${data.responsavel}</p>
                         </div>
 
-                        <button onclick="resetForm()" class="btn-premium">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                            Cadastrar outro cliente
-                        </button>
+                        <div class="space-y-3">
+                            <button onclick="criarGrupo()" class="btn-premium" id="btnGrupo" style="background: #16a34a;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                Criar Grupo WhatsApp
+                            </button>
+
+                            <button onclick="resetForm()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                Cadastrar outro cliente
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
+        }
+
+        async function criarGrupo() {
+            const btn = document.getElementById('btnGrupo');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Criando grupo...';
+
+            try {
+                const response = await fetch(WEBHOOK_URL + '-grupo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lastSubmittedData)
+                });
+
+                if (!response.ok) throw new Error('Erro');
+
+                btn.style.background = '#22c55e';
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Grupo criado!';
+                btn.disabled = true;
+            } catch (error) {
+                btn.style.background = '#ef4444';
+                btn.innerHTML = 'Erro ao criar grupo — tente novamente';
+                btn.disabled = false;
+                btn.onclick = criarGrupo;
+            }
         }
 
         function renderError(message) {
