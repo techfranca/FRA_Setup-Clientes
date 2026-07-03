@@ -244,6 +244,37 @@
                                     </select>
                                     <p class="error-msg" id="responsavel-error">Selecione um responsável</p>
                                 </div>
+
+                                <div>
+                                    <label>Serviços Contratados <span class="text-red-400">*</span></label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2" id="servicos-container">
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Tráfego Pago" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Tráfego Pago</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Produção de Conteúdo" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Produção de Conteúdo</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Automações" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Automações</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Criação de Páginas" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Criação de Páginas</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Edição de Anúncios" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Edição de Anúncios</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Implementação Produto Digital" class="w-4 h-4 accent-[#7DE08D] rounded">
+                                            <span class="text-sm text-slate-700">Implementação Produto Digital</span>
+                                        </label>
+                                    </div>
+                                    <p class="error-msg" id="servicos-error">Selecione ao menos um serviço</p>
+                                </div>
                             </div>
 
                             <div class="mt-8">
@@ -321,6 +352,7 @@
                 segmento: document.getElementById('segmento').value,
                 nicho: document.getElementById('nicho').value.trim(),
                 responsavel: document.getElementById('responsavel').value,
+                servicos: Array.from(document.querySelectorAll('input[name="servicos"]:checked')).map(el => el.value),
                 timestamp: new Date().toISOString()
             };
 
@@ -333,6 +365,7 @@
             if (!data.segmento) { showError('segmento'); hasError = true; }
             if (!data.nicho) { showError('nicho'); hasError = true; }
             if (!data.responsavel) { showError('responsavel'); hasError = true; }
+            if (data.servicos.length === 0) { showError('servicos'); hasError = true; }
 
             if (hasError) return;
 
