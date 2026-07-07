@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franca Assessoria - Definir Contrato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --franca-green: #7DE08D; --franca-dark: #081534; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
+        .blob { position: fixed; filter: blur(80px); z-index: -1; opacity: 0.6; animation: float 10s ease-in-out infinite; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #dcfce3; }
+        .blob-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #e0f2fe; animation-delay: 2s; }
+        .blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: #f0fdf4; animation-delay: 4s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, 40px); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .custom-input { width: 100%; padding: 1rem 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; color: #1e293b; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; }
+        .custom-input:hover { border-color: #cbd5e1; background-color: #fff; }
+        .custom-input:focus { outline: none; background-color: #fff; border-color: #7DE08D; box-shadow: 0 0 0 4px rgba(125, 224, 141, 0.15); transform: translateY(-1px); }
+        .custom-input.error { border-color: #fda4af; background-color: #fff1f2; }
+        label { font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem; display: block; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(8, 21, 52, 0.05); }
+        .btn-premium { background: #081534; color: white; font-weight: 600; padding: 1rem 2rem; border-radius: 0.75rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; cursor: pointer; border: none; font-size: 1rem; }
+        .btn-premium:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(8, 21, 52, 0.3); background: #0a1b42; }
+        .btn-premium:disabled { opacity: 0.7; cursor: not-allowed; }
+        select.custom-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem; }
+        .error-msg { color: #e11d48; font-size: 0.8rem; margin-top: 0.25rem; display: none; }
+        .error-msg.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .spinner-dark { width: 24px; height: 24px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #7DE08D; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 2rem auto; }
+        .success-icon { width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+        .card-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-top: 0.5rem; }
+        .card-info p { font-size: 0.85rem; color: #475569; margin: 0.25rem 0; }
+        .card-info strong { color: #1e293b; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-white via-slate-50 to-blue-50">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="min-h-screen flex flex-col">
+        <main class="flex-1 px-4 py-12 md:py-20 max-w-2xl mx-auto w-full">
+            <div id="app"></div>
+        </main>
+        <footer class="border-t border-slate-100 bg-white/50 backdrop-blur-sm py-6 text-center text-sm text-slate-500">
+            <p>&copy; Franca Assessoria. Uso interno.</p>
+        </footer>
+    </div>
+
+    <script>
+        const CLICKUP_API = 'https://api.clickup.com/api/v2';
+        const CLICKUP_TOKEN = 'pk_81520534_M5YUATY3H4HJUXGKIK57N168XKOWUODI';
+        const LIST_ID = '901109737593';
+        const WEBHOOK_URL = 'https://webhooks.francaassessoria.com/webhook/definir-contrato';
+
+        let cards = [];
+        let isLoading = false;
+
+        async function carregarCards() {
+            document.getElementById('app').innerHTML = `
+                <div class="text-center py-20">
+                    <div class="spinner-dark"></div>
+                    <p class="text-slate-500 mt-4">Carregando contratos pendentes...</p>
+                </div>`;
+
+            try {
+                const response = await fetch(
+                    `${CLICKUP_API}/list/${LIST_ID}/task?statuses[]=fazer%20contrato`,
+                    { headers: { 'Authorization': CLICKUP_TOKEN } }
+                );
+                const data = await response.json();
+                cards = (data.tasks || []).map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    description: t.description || ''
+                }));
+                render();
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center">
+                        <p class="text-red-500 mb-4">Erro ao carregar contratos.</p>
+                        <button onclick="carregarCards()" class="btn-premium">Tentar novamente</button>
+                    </div>`;
+            }
+        }
+
+        function render() {
+            const cardOptions = cards.length === 0
+                ? '<option value="" disabled selected>Nenhum contrato pendente</option>'
+                : '<option value="" disabled selected>Selecione o contrato</option>' +
+                  cards.map((c, i) => `<option value="${i}">${c.name}</option>`).join('');
+
+            document.getElementById('app').innerHTML = `
+                <div class="animate-slide-up">
+                    <div class="text-center mb-10">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-slate-200 shadow-sm mb-6">
+                            <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
+                            <span class="text-sm text-slate-600 font-medium">Definir Contrato</span>
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-3">Informações do Contrato</h1>
+                        <p class="text-slate-500">Defina valor, serviços e pagamento pra Bruna criar o contrato.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 md:p-10">
+                        <form id="contratoForm" onsubmit="handleSubmit(event)">
+                            <div class="space-y-5">
+                                <div>
+                                    <label for="card">Contrato <span class="text-red-400">*</span></label>
+                                    <select id="card" class="custom-input" required>
+                                        ${cardOptions}
+                                    </select>
+                                    <p class="error-msg" id="card-error">Selecione um contrato</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="valor">Valor do Contrato (R$) <span class="text-red-400">*</span></label>
+                                        <input type="text" id="valor" class="custom-input" placeholder="Ex: 1.500,00" required>
+                                        <p class="error-msg" id="valor-error">Informe o valor</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="data_pagamento">Data de Pagamento <span class="text-red-400">*</span></label>
+                                        <input type="text" id="data_pagamento" class="custom-input" placeholder="Ex: Todo dia 10" required>
+                                        <p class="error-msg" id="data_pagamento-error">Informe a data</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label>Serviços Contratados <span class="text-red-400">*</span></label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Tráfego Pago" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Tráfego Pago</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Produção de Conteúdo" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Produção de Conteúdo</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Automações" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Automações</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Criação de Páginas" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Criação de Páginas</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Edição de Anúncios" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Edição de Anúncios</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="checkbox" name="servicos" value="Implementação Produto Digital" class="w-4 h-4 accent-[#7DE08D]">
+                                            <span class="text-sm text-slate-700">Implementação Produto Digital</span>
+                                        </label>
+                                    </div>
+                                    <p class="error-msg" id="servicos-error">Selecione ao menos um serviço</p>
+                                </div>
+
+                                <div>
+                                    <label for="observacoes">Observações (opcional)</label>
+                                    <textarea id="observacoes" class="custom-input" rows="3" placeholder="Algo que a Bruna precisa saber pra fazer o contrato..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-8">
+                                <button type="submit" class="btn-premium" id="submitBtn" ${isLoading || cards.length === 0 ? 'disabled' : ''}>
+                                    ${isLoading ? '<div class="spinner"></div> Enviando...' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> Definir e Enviar pra Bruna'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>`;
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.custom-input').forEach(el => el.classList.remove('error'));
+
+            const cardIdx = document.getElementById('card').value;
+            const card = cards[cardIdx];
+            const servicos = Array.from(document.querySelectorAll('input[name="servicos"]:checked')).map(el => el.value);
+
+            const data = {
+                card_id: card.id,
+                card_name: card.name,
+                valor: document.getElementById('valor').value.trim(),
+                data_pagamento: document.getElementById('data_pagamento').value.trim(),
+                servicos: servicos,
+                observacoes: document.getElementById('observacoes').value.trim()
+            };
+
+            let hasError = false;
+            if (cardIdx === '' || cardIdx === null) { showError('card'); hasError = true; }
+            if (!data.valor) { showError('valor'); hasError = true; }
+            if (!data.data_pagamento) { showError('data_pagamento'); hasError = true; }
+            if (servicos.length === 0) { showError('servicos'); hasError = true; }
+            if (hasError) return;
+
+            isLoading = true;
+            render();
+
+            try {
+                // 1. Atualizar card no ClickUp — descrição + status
+                const descricao = card.description +
+                    '\n\n---\n\n' +
+                    '💰 **Valor:** R$ ' + data.valor + '\n' +
+                    '📋 **Serviços:** ' + servicos.join(', ') + '\n' +
+                    '📅 **Data de Pagamento:** ' + data.data_pagamento +
+                    (data.observacoes ? '\n📝 **Obs:** ' + data.observacoes : '') +
+                    '\n\n_Definido por Gabriel_';
+
+                await fetch(`${CLICKUP_API}/task/${card.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': CLICKUP_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: descricao,
+                        status: 'assinar contrato'
+                    })
+                });
+
+                // 2. Webhook n8n — notificar Bruna
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(data)
+                }).catch(() => {});
+
+                document.getElementById('app').innerHTML = renderSuccess(data);
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center">
+                        <p class="text-red-500 mb-4">Erro ao atualizar o contrato.</p>
+                        <button onclick="carregarCards()" class="btn-premium">Tentar novamente</button>
+                    </div>`;
+            }
+
+            isLoading = false;
+        }
+
+        function renderSuccess(data) {
+            return `
+                <div class="animate-slide-up">
+                    <div class="glass-card rounded-2xl p-8 md:p-10 text-center">
+                        <div class="success-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Contrato definido!</h2>
+                        <p class="text-slate-500 mb-6"><strong>${data.card_name}</strong> atualizado e enviado pra Bruna.</p>
+
+                        <div class="bg-slate-50 rounded-xl p-5 text-left mb-6 space-y-2">
+                            <p class="text-sm text-slate-600"><strong>Valor:</strong> R$ ${data.valor}</p>
+                            <p class="text-sm text-slate-600"><strong>Serviços:</strong> ${data.servicos.join(', ')}</p>
+                            <p class="text-sm text-slate-600"><strong>Pagamento:</strong> ${data.data_pagamento}</p>
+                            <p class="text-sm text-slate-600"><strong>Status no ClickUp:</strong> Assinar Contrato</p>
+                        </div>
+
+                        <button onclick="carregarCards()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
+                            Definir outro contrato
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function showError(field) {
+            const el = document.getElementById(field);
+            if (el) el.classList.add('error');
+            const err = document.getElementById(field + '-error');
+            if (err) err.classList.add('show');
+        }
+
+        carregarCards();
+    </script>
+</body>
+</html>
