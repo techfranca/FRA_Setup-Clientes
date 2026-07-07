@@ -71,7 +71,7 @@
 
             try {
                 const response = await fetch(
-                    `${CLICKUP_API}/list/${LIST_ID}/task?statuses[]=fazer%20contrato`,
+                    `${CLICKUP_API}/list/${LIST_ID}/task?statuses[]=pegando%20dados`,
                     { headers: { 'Authorization': CLICKUP_TOKEN } }
                 );
                 const data = await response.json();
@@ -226,7 +226,7 @@
                     },
                     body: JSON.stringify({
                         description: descricao,
-                        status: 'assinar contrato'
+                        status: 'fazer contrato'
                     })
                 });
 
@@ -266,7 +266,8 @@
                             <p class="text-sm text-slate-600"><strong>Valor:</strong> R$ ${data.valor}</p>
                             <p class="text-sm text-slate-600"><strong>Serviços:</strong> ${data.servicos.join(', ')}</p>
                             <p class="text-sm text-slate-600"><strong>Pagamento:</strong> ${data.data_pagamento}</p>
-                            <p class="text-sm text-slate-600"><strong>Status no ClickUp:</strong> Assinar Contrato</p>
+                            <p class="text-sm text-slate-600"><strong>Status no ClickUp:</strong> Fazer Contrato</p>
+                            <p class="text-sm text-slate-600"><strong>Planilha:</strong> Dados salvos</p>
                         </div>
 
                         <button onclick="carregarCards()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
