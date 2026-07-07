@@ -89,6 +89,7 @@
                 const colEmail = headers.indexOf('E-mail');
                 const colSocio = headers.indexOf('Nome do Sócio/Responsável');
                 const colCelular = headers.indexOf('Celular');
+                const colServicos = headers.indexOf('Serviços Contratados');
 
                 clientes = [];
                 for (let i = 1; i < linhas.length; i++) {
@@ -105,7 +106,8 @@
                             cnpjCpf: (row[colCNPJ] || '').trim(),
                             email: (row[colEmail] || '').trim(),
                             socio: (row[colSocio] || '').trim(),
-                            celular: (row[colCelular] || '').trim()
+                            celular: (row[colCelular] || '').trim(),
+                            servicos: colServicos >= 0 ? (row[colServicos] || '').trim() : ''
                         });
                     }
                 }
@@ -416,6 +418,7 @@
                 // Dados do cliente selecionado
                 clienteNome: cliente.nome,
                 rowNumber: cliente.rowNumber,
+                servicos: cliente.servicos,
                 // Dados operacionais
                 nomeGrupo: document.getElementById('nomeGrupo').value.trim(),
                 tag: document.getElementById('tag').value.trim().toUpperCase(),
