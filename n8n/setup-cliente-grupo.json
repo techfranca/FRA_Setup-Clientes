@@ -1,0 +1,134 @@
+{
+  "name": "Setup Novo Cliente - Criar Grupo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "setup-cliente-grupo",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-grupo",
+      "name": "Webhook - Criar Grupo",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/group/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ name: $json.body.nomeGrupo + ' | Franca Marketing 📈', participants: $json.body.participantes.map(n => n + '@s.whatsapp.net') }) }}",
+        "options": {}
+      },
+      "id": "criar-grupo",
+      "name": "Criar Grupo WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbwm_K6TZhwMx6rz6mio0z90lWrJhQ3TtKX0-13UDdjolNmkTV0qwWjVH5njEWzxe9IlRg/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tag: $json.body.tag, column: 'ID Grupo Wpp', value: $('Criar Grupo WhatsApp').item.json.group.JID }) }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 5
+            }
+          }
+        }
+      },
+      "id": "salvar-jid",
+      "name": "Salvar JID na Planilha",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, grupo_jid: $('Criar Grupo WhatsApp').item.json.group.JID }) }}"
+      },
+      "id": "responder-grupo",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [940, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Criar Grupo": {
+      "main": [
+        [
+          {
+            "node": "Criar Grupo WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Grupo WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Salvar JID na Planilha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar JID na Planilha": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
