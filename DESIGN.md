@@ -28,17 +28,27 @@ usando o *slant* do logotipo como grafismo (trama de fundo, marcadores de seçã
 ## Sombras
 - sutil (cards) → média (card ativo) → forte (sucesso). Ver `--shadow-*`.
 
-## Layout
-- Container centralizado `max-w-2xl`, card único com as seções separadas por
-  `hr.rule` (Cliente → Dados operacionais → Serviços).
+## Layout (painel operacional)
+- **Tela de operação, não landing:** cabeçalho compacto alinhado à esquerda,
+  hero enxuto, densidade voltada a preenchimento rápido.
+- Container largo `max-w-[1100px]`. Cliente ocupa a largura total no topo do painel.
+- **Desktop (lg+):** 2 colunas — `grid-cols-[minmax(0,1fr)_320px]`: dados
+  operacionais na coluna principal, serviços na lateral. Objetivo: pouco/nenhum
+  scroll em 1440×900.
+- **Mobile:** empilhado (serviços abaixo dos dados); barra de ações **sticky** no
+  rodapé da viewport.
+- Campos compactos (~46px), gaps enxutos. Info do cliente = resumo horizontal.
 
 ## Componentes
 - **Botão:** navy sólido, texto branco, brilho verde diagonal no hover, 1 linha só.
   Variante `.btn-green` para ações de WhatsApp; `.btn-ghost` para secundário.
 - **Título de seção:** marcador diagonal verde (motivo do logo) antes do texto.
 - **Inputs:** fundo branco, foco com anel verde `rgba(125,224,141,.22)`; `.error` rosa.
-- **Serviços:** checkbox em card premium com check verde ao marcar.
-- **Info do cliente:** painel `green-tint` com `<dl>` (label verde + valor).
+- **Serviços:** checkbox em card premium com check verde ao marcar; painel
+  lateral (`.services-side`) no desktop, empilhado no mobile.
+- **Info do cliente:** painel `green-tint` horizontal (label verde + valor).
+- **Barra de ações (`.action-bar`):** "Limpar" (ghost) + "Criar setup" (navy),
+  à direita no desktop; sticky no rodapé no mobile.
 - **Header:** logo real (`logo.png`) + wordmark Poppins + chip "Setup Interno".
 
 ## Movimento
@@ -46,7 +56,7 @@ usando o *slant* do logotipo como grafismo (trama de fundo, marcadores de seçã
 
 ## Estados de UI
 - **Loading:** spinner escuro centralizado no card.
-- **Vazio:** select desabilitado + botão desabilitado ("Nenhum cliente pendente").
+- **Vazio:** tela dedicada centralizada ("Nenhum cliente pendente" + "Atualizar lista").
 - **Erro:** card com ícone vermelho + "Tentar novamente".
 - **Sucesso:** selo verde + resumo das planilhas + ações de grupo.
 

@@ -147,13 +147,14 @@
        INPUTS
        ============================================================ */
     .field-label {
-      display: block; font-size: .8rem; font-weight: 600;
-      color: var(--ink-soft); margin-bottom: .5rem;
+      display: block; font-size: .78rem; font-weight: 600;
+      color: var(--ink-soft); margin-bottom: .38rem;
     }
     .input {
-      width: 100%; padding: .9rem 1.05rem;
+      /* Densidade operacional: campos mais baixos (~46px) p/ reduzir scroll */
+      width: 100%; padding: .68rem 1rem;
       background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm);
-      font-size: .95rem; color: var(--ink); font-family: inherit;
+      font-size: .93rem; color: var(--ink); font-family: inherit;
       transition: border-color .2s, box-shadow .2s, background .2s;
     }
     .input::placeholder { color: var(--ink-mute); }
@@ -187,13 +188,14 @@
     .error-msg.show { display: block; }
 
     /* Painel de info do cliente selecionado (verde suave da marca) */
+    /* Info do cliente: resumo horizontal compacto (aproveita a largura, pouca altura) */
     .client-info {
       background: var(--green-tint); border: 1px solid var(--green-line);
-      border-radius: var(--radius-sm); padding: 1rem 1.15rem; margin-top: .6rem;
+      border-radius: var(--radius-sm); padding: .7rem .9rem; margin-top: .5rem;
+      display: flex; flex-wrap: wrap; gap: .35rem 1.15rem;
     }
-    .client-info dl { display: grid; grid-template-columns: auto 1fr; gap: .35rem 1rem; }
-    .client-info dt { font-size: .78rem; font-weight: 600; color: var(--green-deep); }
-    .client-info dd { font-size: .82rem; color: var(--ink); }
+    .client-info span { font-size: .8rem; color: var(--ink); }
+    .client-info b { color: var(--green-deep); font-weight: 600; }
 
     /* ============================================================
        CHECKBOX DE SERVIÇOS (cards selecionáveis, estilo premium)
@@ -257,6 +259,38 @@
     /* Divisória fina */
     .rule { height: 1px; background: var(--line); border: 0; }
 
+    /* ============================================================
+       LAYOUT OPERACIONAL (painel largo em 2 colunas no desktop)
+       ============================================================ */
+    /* Painel lateral de serviços — destaca-se do card branco */
+    .services-side {
+      background: var(--paper); border: 1px solid var(--line);
+      border-radius: var(--radius-sm); padding: 1.05rem 1.1rem; align-self: start;
+    }
+
+    /* Barra de ações (desktop: à direita, integrada ao painel) */
+    .action-bar {
+      display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
+      margin-top: 1.15rem;
+    }
+    .action-bar .btn, .action-bar .btn-ghost { width: auto; }
+
+    /* Mobile: barra sticky no rodapé da viewport, sangrando até a borda do card */
+    @media (max-width: 640px) {
+      .action-bar {
+        position: sticky; bottom: 0; z-index: 40;
+        flex-direction: column-reverse; gap: .6rem;
+        margin: 1.25rem -1.5rem -1.5rem;               /* card p-6 = 1.5rem */
+        padding: .85rem 1.5rem calc(.85rem + env(safe-area-inset-bottom, 0px));
+        background: rgba(255,255,255,.94);
+        backdrop-filter: saturate(180%) blur(10px);
+        -webkit-backdrop-filter: saturate(180%) blur(10px);
+        border-top: 1px solid var(--line);
+        border-radius: 0 0 var(--radius) var(--radius);
+      }
+      .action-bar .btn, .action-bar .btn-ghost { width: 100%; }
+    }
+
     /* Spinners */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
@@ -277,7 +311,7 @@
 
   <!-- ============================ HEADER ============================ -->
   <header class="site-header">
-    <div class="max-w-2xl mx-auto px-5 sm:px-6 h-16 flex items-center justify-between">
+    <div class="max-w-[1100px] mx-auto px-5 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <img src="logo.png" alt="Logotipo da Franca Assessoria" class="h-9 w-auto" width="43" height="36">
         <span class="hidden sm:block h-6 w-px bg-slate-200"></span>
@@ -288,20 +322,19 @@
   </header>
 
   <!-- ============================ CONTEÚDO ============================ -->
-  <main class="flex-1 w-full max-w-2xl mx-auto px-5 sm:px-6 pt-10 pb-14">
+  <main class="flex-1 w-full max-w-[1100px] mx-auto px-5 sm:px-6 pt-5 pb-6">
     <div id="app"></div>
   </main>
 
-  <!-- ============================ RODAPÉ ============================ -->
-  <footer class="w-full max-w-2xl mx-auto px-5 sm:px-6 pb-10 text-center">
-    <hr class="rule mb-6">
-    <p class="text-sm text-slate-500">
+  <!-- ============================ RODAPÉ (discreto, fora do fluxo principal) ============================ -->
+  <footer class="w-full max-w-[1100px] mx-auto px-5 sm:px-6 pb-5 pt-1 text-center">
+    <p class="text-xs text-slate-400">
       Feito por
       <a class="foot-link"
          href="https://wa.me/5521991097451?text=Ol%C3%A1!%20Vim%20pela%20ferramenta%20de%20setup%20e%20gostaria%20de%20falar%20com%20a%20Franca%20Marketing."
          target="_blank" rel="noopener">Franca Marketing</a>
+      · © <span id="year"></span> Franca Assessoria · Uso interno
     </p>
-    <p class="text-xs text-slate-500 mt-1">© <span id="year"></span> Franca Assessoria · Uso interno</p>
   </footer>
 
   <script>
@@ -436,33 +469,21 @@
           const info = document.getElementById('client-info');
           if (idx === '') { info.style.display = 'none'; return; }
           const c = clientes[idx];
-          info.style.display = 'block';
+          info.style.display = 'flex';
           info.innerHTML = `
-            <dl>
-              <dt>Tipo</dt><dd>${esc(c.tipo) || '—'}</dd>
-              <dt>CNPJ/CPF</dt><dd>${esc(c.cnpjCpf) || '—'}</dd>
-              <dt>E-mail</dt><dd>${esc(c.email) || '—'}</dd>
-              ${c.socio ? `<dt>Responsável</dt><dd>${esc(c.socio)}</dd>` : ''}
-              ${c.celular ? `<dt>Celular</dt><dd>${esc(c.celular)}</dd>` : ''}
-            </dl>`;
+            <span><b>Tipo:</b> ${esc(c.tipo) || '—'}</span>
+            <span><b>CNPJ/CPF:</b> ${esc(c.cnpjCpf) || '—'}</span>
+            <span><b>E-mail:</b> ${esc(c.email) || '—'}</span>
+            ${c.socio ? `<span><b>Responsável:</b> ${esc(c.socio)}</span>` : ''}
+            ${c.celular ? `<span><b>Celular:</b> ${esc(c.celular)}</span>` : ''}`;
         });
       }
-    }
-
-    // Cabeçalho de conteúdo (eyebrow + título + subtítulo)
-    function renderIntro(eyebrow, title, subtitle) {
-      return `
-        <div class="text-center mb-9 rise d1">
-          <p class="eyebrow mb-3">${eyebrow}</p>
-          <h1 class="text-3xl sm:text-[2.4rem] leading-[1.1] font-semibold text-franca-dark mb-3" style="text-wrap:balance">${title}</h1>
-          <p class="text-slate-500 text-base max-w-md mx-auto leading-relaxed" style="text-wrap:pretty">${subtitle}</p>
-        </div>`;
     }
 
     // ---------------------------- ESTADO VAZIO ----------------------------
     function renderEmpty() {
       return `
-        <div class="rise d1">
+        <div class="rise d1 max-w-lg mx-auto">
           <div class="card p-8 sm:p-10 text-center" style="box-shadow:var(--shadow-md)">
             <div class="mx-auto mb-6 w-16 h-16 rounded-2xl grid place-items-center" style="background:var(--green-tint);border:1px solid var(--green-line)">
               <svg class="w-8 h-8" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="var(--green-deep)" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
@@ -474,114 +495,117 @@
         </div>`;
     }
 
-    // ---------------------------- FORMULÁRIO ----------------------------
+    // ---------------------------- FORMULÁRIO (painel operacional) ----------------------------
     function renderForm() {
-      const semClientes = clientes.length === 0;
-      const clienteOptions = semClientes
-        ? '<option value="" disabled selected>Nenhum cliente pendente de setup</option>'
-        : '<option value="" disabled selected>Selecione o cliente</option>' +
-          clientes.map((c, i) => `<option value="${i}">${esc(c.nome)}</option>`).join('');
+      const clienteOptions =
+        '<option value="" disabled selected>Selecione o cliente</option>' +
+        clientes.map((c, i) => `<option value="${i}">${esc(c.nome)}</option>`).join('');
 
       return `
-        ${renderIntro('Setup operacional', 'Configurar novo&nbsp;cliente', 'Selecione o cliente pendente e preencha os dados operacionais para ativá-lo.')}
+        <!-- Cabeçalho compacto, alinhado à esquerda (tela de operação, não landing) -->
+        <div class="rise d1 mb-4">
+          <h1 class="text-2xl sm:text-[1.7rem] font-semibold text-franca-dark leading-tight">Configurar novo cliente</h1>
+          <p class="text-slate-500 text-sm mt-1">Selecione o cliente pendente e preencha os dados operacionais para ativá-lo.</p>
+        </div>
 
         <form id="setupForm" class="rise d2" novalidate onsubmit="handleSubmit(event)">
-          <div class="card p-6 sm:p-8 space-y-8" style="box-shadow:var(--shadow-md)">
+          <div class="card p-6 sm:p-7" style="box-shadow:var(--shadow-md)">
 
-            <!-- BLOCO 1 — Cliente -->
-            <div class="space-y-5">
-              <div class="section-title">Cliente</div>
-              <div>
-                <label class="field-label" for="cliente">Cliente pendente <span style="color:var(--danger)">*</span></label>
-                <select id="cliente" class="input" required ${semClientes ? 'disabled' : ''}>
-                  ${clienteOptions}
-                </select>
-                <div id="client-info" class="client-info" style="display:none;"></div>
-                <p class="error-msg" id="cliente-error">Selecione um cliente</p>
-              </div>
+            <!-- Cliente: largura total no topo do painel -->
+            <div class="mb-6">
+              <label class="field-label" for="cliente">Cliente pendente <span style="color:var(--danger)">*</span></label>
+              <select id="cliente" class="input" required>
+                ${clienteOptions}
+              </select>
+              <div id="client-info" class="client-info" style="display:none;"></div>
+              <p class="error-msg" id="cliente-error">Selecione um cliente</p>
             </div>
 
-            <hr class="rule">
+            <!-- Desktop: 2 colunas (dados = principal | serviços = lateral). Mobile: empilhado -->
+            <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-7">
 
-            <!-- BLOCO 2 — Dados operacionais -->
-            <div class="space-y-5">
-              <div class="section-title">Dados operacionais</div>
+              <!-- COLUNA PRINCIPAL — Dados operacionais -->
+              <div class="space-y-4">
+                <div class="section-title">Dados operacionais</div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label class="field-label" for="nomeGrupo">Nome no Grupo <span style="color:var(--danger)">*</span></label>
-                  <input type="text" id="nomeGrupo" class="input" placeholder="Como aparece no grupo WhatsApp" required>
-                  <p class="error-msg" id="nomeGrupo-error">Campo obrigatório</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="field-label" for="nomeGrupo">Nome no Grupo <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="nomeGrupo" class="input" placeholder="Como aparece no grupo WhatsApp" required>
+                    <p class="error-msg" id="nomeGrupo-error">Campo obrigatório</p>
+                  </div>
+                  <div>
+                    <label class="field-label" for="tag">TAG <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="tag" class="input" placeholder="Ex: LIVEN, REALP" required style="text-transform:uppercase">
+                    <p class="error-msg" id="tag-error">Campo obrigatório</p>
+                  </div>
                 </div>
+
                 <div>
-                  <label class="field-label" for="tag">TAG <span style="color:var(--danger)">*</span></label>
-                  <input type="text" id="tag" class="input" placeholder="Ex: LIVEN, REALP" required style="text-transform:uppercase">
-                  <p class="error-msg" id="tag-error">Campo obrigatório</p>
+                  <label class="field-label" for="whatsapp">WhatsApp do Cliente <span style="color:var(--danger)">*</span></label>
+                  <input type="tel" id="whatsapp" class="input" placeholder="5521999999999" inputmode="numeric" autocomplete="tel" required>
+                  <p class="error-msg" id="whatsapp-error">Informe com país (55) e DDD</p>
                 </div>
-              </div>
 
-              <div>
-                <label class="field-label" for="whatsapp">WhatsApp do Cliente <span style="color:var(--danger)">*</span></label>
-                <input type="tel" id="whatsapp" class="input" placeholder="5521999999999" inputmode="numeric" autocomplete="tel" required>
-                <p class="error-msg" id="whatsapp-error">Informe com país (55) e DDD</p>
-              </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="field-label" for="segmento">Segmento <span style="color:var(--danger)">*</span></label>
+                    <select id="segmento" class="input" required>
+                      <option value="" disabled selected>Selecione</option>
+                      <option value="Infoproduto">Infoproduto</option>
+                      <option value="Imobiliária">Imobiliária</option>
+                      <option value="Negócio Local">Negócio Local</option>
+                      <option value="Inside Sales">Inside Sales</option>
+                      <option value="E-commerce">E-commerce</option>
+                    </select>
+                    <p class="error-msg" id="segmento-error">Selecione um segmento</p>
+                  </div>
+                  <div>
+                    <label class="field-label" for="nicho">Nicho <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="nicho" class="input" placeholder="Ex: Arquitetos, Advocacia" required>
+                    <p class="error-msg" id="nicho-error">Campo obrigatório</p>
+                  </div>
+                </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label class="field-label" for="segmento">Segmento <span style="color:var(--danger)">*</span></label>
-                  <select id="segmento" class="input" required>
+                  <label class="field-label" for="responsavel">Responsável Tráfego <span style="color:var(--danger)">*</span></label>
+                  <select id="responsavel" class="input" required>
                     <option value="" disabled selected>Selecione</option>
-                    <option value="Infoproduto">Infoproduto</option>
-                    <option value="Imobiliária">Imobiliária</option>
-                    <option value="Negócio Local">Negócio Local</option>
-                    <option value="Inside Sales">Inside Sales</option>
-                    <option value="E-commerce">E-commerce</option>
+                    <option value="Gabriel">Gabriel</option>
+                    <option value="Bruna">Bruna</option>
+                    <option value="Leo">Leo</option>
+                    <option value="Guilherme">Guilherme</option>
+                    <option value="Davidson">Davidson</option>
                   </select>
-                  <p class="error-msg" id="segmento-error">Selecione um segmento</p>
-                </div>
-                <div>
-                  <label class="field-label" for="nicho">Nicho <span style="color:var(--danger)">*</span></label>
-                  <input type="text" id="nicho" class="input" placeholder="Ex: Arquitetos, Advocacia" required>
-                  <p class="error-msg" id="nicho-error">Campo obrigatório</p>
+                  <p class="error-msg" id="responsavel-error">Selecione um responsável</p>
                 </div>
               </div>
 
-              <div>
-                <label class="field-label" for="responsavel">Responsável Tráfego <span style="color:var(--danger)">*</span></label>
-                <select id="responsavel" class="input" required>
-                  <option value="" disabled selected>Selecione</option>
-                  <option value="Gabriel">Gabriel</option>
-                  <option value="Bruna">Bruna</option>
-                  <option value="Leo">Leo</option>
-                  <option value="Guilherme">Guilherme</option>
-                  <option value="Davidson">Davidson</option>
-                </select>
-                <p class="error-msg" id="responsavel-error">Selecione um responsável</p>
-              </div>
+              <!-- COLUNA LATERAL — Serviços contratados -->
+              <aside class="services-side mt-6 lg:mt-0">
+                <div class="section-title mb-3">Serviços contratados <span style="color:var(--danger)">*</span></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
+                  ${renderServico('Tráfego Pago')}
+                  ${renderServico('Produção de Conteúdo')}
+                  ${renderServico('Automações')}
+                  ${renderServico('Criação de Páginas')}
+                  ${renderServico('Edição de Anúncios')}
+                  ${renderServico('Implementação Produto Digital')}
+                </div>
+                <p class="error-msg" id="servicos-error">Selecione ao menos um serviço</p>
+              </aside>
             </div>
 
-            <hr class="rule">
-
-            <!-- BLOCO 3 — Serviços -->
-            <div class="space-y-4">
-              <div class="section-title">Serviços contratados <span style="color:var(--danger)">*</span></div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                ${renderServico('Tráfego Pago')}
-                ${renderServico('Produção de Conteúdo')}
-                ${renderServico('Automações')}
-                ${renderServico('Criação de Páginas')}
-                ${renderServico('Edição de Anúncios')}
-                ${renderServico('Implementação Produto Digital')}
-              </div>
-              <p class="error-msg" id="servicos-error">Selecione ao menos um serviço</p>
+            <!-- Barra de ações: integrada ao painel (desktop) · sticky no rodapé (mobile) -->
+            <div class="action-bar">
+              <button type="button" class="btn-ghost" onclick="limparFormulario()">Limpar</button>
+              <button type="submit" class="btn" id="submitBtn" ${isLoading ? 'disabled aria-busy="true"' : ''}>
+                ${isLoading
+                  ? '<div class="spinner" role="status" aria-label="Enviando"></div> Criando setup…'
+                  : `Criar setup do cliente ${arrowIcon()}`}
+              </button>
             </div>
           </div>
-
-          <button type="submit" class="btn mt-7" id="submitBtn" ${isLoading || semClientes ? 'disabled' : ''} ${isLoading ? 'aria-busy="true"' : ''}>
-            ${isLoading
-              ? '<div class="spinner" role="status" aria-label="Enviando"></div> Criando setup…'
-              : `Criar setup do cliente ${arrowIcon()}`}
-          </button>
         </form>`;
     }
 
@@ -599,7 +623,7 @@
     function renderSuccess(data) {
       lastSubmittedData = data;
       return `
-        <div class="rise d1">
+        <div class="rise d1 max-w-lg mx-auto">
           <div class="card p-8 sm:p-10 text-center" role="status" aria-live="polite" style="box-shadow:var(--shadow-md)">
             <div class="relative mx-auto mb-7 w-20 h-20">
               <div class="absolute inset-0 rounded-full" style="background:var(--green);filter:blur(24px);opacity:.5"></div>
@@ -733,7 +757,7 @@
     // ---------------------------- ERRO ----------------------------
     function renderError(message) {
       return `
-        <div class="rise d1">
+        <div class="rise d1 max-w-lg mx-auto">
           <div class="card p-8 sm:p-10 text-center" role="alert" style="box-shadow:var(--shadow-md)">
             <div class="mx-auto mb-6 w-16 h-16 rounded-full grid place-items-center" style="background:#fef2f2">
               <svg class="w-8 h-8" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -846,6 +870,17 @@
     function focarTitulo() {
       const t = document.querySelector('#app [tabindex="-1"]');
       if (t) t.focus({ preventScroll: true });
+    }
+
+    // Ação "Limpar" da barra: reseta os campos sem sair da tela
+    function limparFormulario() {
+      const form = document.getElementById('setupForm');
+      if (!form) return;
+      form.reset();
+      const info = document.getElementById('client-info');
+      if (info) info.style.display = 'none';
+      limparErros();
+      document.getElementById('cliente')?.focus();
     }
 
     // ============================================================
