@@ -1,0 +1,60 @@
+{
+  "name": "Contrato Form - ClickUp Card",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contrato-form",
+        "responseMode": "onReceived",
+        "responseCode": 200,
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "webhook-contrato",
+      "name": "Webhook Contrato Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clickup.com/api/v2/list/901109737593/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "pk_81520534_M5YUATY3H4HJUXGKIK57N168XKOWUODI" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { let d = $json.body || $json; if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = {}; } } const isPJ = !!(d.nome_empresa || d.cnpj); const nome = d.nome_empresa || d.nome_completo || 'Novo Cliente'; const doc = d.cnpj || d.cpf || '-'; const resp = d.nome_contratante || d.nome_completo || '-'; const tipo = isPJ ? 'Pessoa Jurídica' : 'Pessoa Física'; const desc = '\\ud83d\\udfe2 **NOVO CONTRATO PRA CRIAR!**\\n\\nUm cliente preencheu o formulário e já está na planilha. \\ud83d\\udc47\\n\\n\\ud83d\\udccb **Tipo:** ' + tipo + '\\n\\ud83c\\udfe2 **Nome/Empresa:** ' + nome + '\\n\\ud83e\\udea8 **Documento:** ' + doc + '\\n\\ud83d\\udce7 **E-mail:** ' + (d.email || '-') + '\\n\\ud83d\\udcf1 **WhatsApp:** ' + (d.telefone || '-') + '\\n\\ud83d\\udc64 **Responsável:** ' + resp + '\\n\\ud83d\\udcb3 **Pagamento:** ' + (d.metodo_pagamento || '-').toUpperCase() + '\\n\\u2709\\ufe0f **E-mail p/ contrato:** ' + (d.email_contrato || '-') + '\\n\\n_Bora criar o contrato de parceria!_ \\ud83e\\udd1d'; return JSON.stringify({ name: 'Contrato - ' + nome, status: 'pegando dados', markdown_description: desc, assignees: [81520535, 81520534], priority: 2, due_date: Date.now() + 86400000, due_date_time: true }); })() }}",
+        "options": {}
+      },
+      "id": "criar-card-clickup",
+      "name": "Criar Card ClickUp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "settings": { "onError": "continueRegularOutput" }
+    }
+  ],
+  "connections": {
+    "Webhook Contrato Form": {
+      "main": [
+        [
+          { "node": "Criar Card ClickUp", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
