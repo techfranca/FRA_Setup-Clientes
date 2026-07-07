@@ -1,0 +1,73 @@
+{
+  "name": "Definir Contrato - Salvar + Notificar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "definir-contrato",
+        "responseMode": "onReceived",
+        "responseCode": 200,
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "webhook-definir",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbwaosr5ds6bhK3aoibqVlf-42nEoZdSNNl4tde-oNQEqt1UTMd9l1mEqgDqXtJGIlYf/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { let d = $json.body || $json; if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = {}; } } const nome = (d.card_name || '').replace('Contrato - ', ''); return JSON.stringify({ action: 'definir_contrato', clienteNome: nome, valor: d.valor || '', servicos: Array.isArray(d.servicos) ? d.servicos.join(', ') : (d.servicos || ''), dataPagamento: d.data_pagamento || '' }); })() }}",
+        "options": { "redirect": { "redirect": { "followRedirects": false } }, "timeout": 10000 }
+      },
+      "id": "salvar-planilha",
+      "name": "Salvar na Planilha",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 200],
+      "settings": { "onError": "continueRegularOutput" }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "token", "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { let d = $json.body || $json; if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = {}; } } const servicos = Array.isArray(d.servicos) ? d.servicos.join(', ') : (d.servicos || ''); const msg = '\\ud83d\\udcdd *Contrato pra criar!*\\n\\n' + (d.card_name || '') + '\\n\\n\\ud83d\\udcb0 *Valor:* R$ ' + (d.valor || '-') + '\\n\\ud83d\\udccb *Serviços:* ' + servicos + '\\n\\ud83d\\udcc5 *Pagamento:* ' + (d.data_pagamento || '-') + (d.observacoes ? '\\n\\ud83d\\udcdd *Obs:* ' + d.observacoes : '') + '\\n\\nO card já tá no ClickUp em \"Fazer Contrato\".'; return JSON.stringify({ number: '5521996393929', text: msg }); })() }}",
+        "options": {}
+      },
+      "id": "avisar-bruna",
+      "name": "Avisar Bruna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 420]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          { "node": "Salvar na Planilha", "type": "main", "index": 0 },
+          { "node": "Avisar Bruna", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
