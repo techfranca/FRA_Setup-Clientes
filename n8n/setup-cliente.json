@@ -25,7 +25,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://script.google.com/macros/s/AKfycbwaosr5ds6bhK3aoibqVlf-42nEoZdSNNl4tde-oNQEqt1UTMd9l1mEqgDqXtJGIlYf/exec",
+        "url": "https://script.google.com/macros/s/AKfycbxFb3XYYS3n7ZEkMwjxml_ZGgMccWayubvpZqA-vBh6jZfcemNWFj3nnXVaeSkOoJHI/exec",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ action: 'setup_cliente', rowNumber: $json.body.rowNumber, tag: $json.body.tag, nomeGrupo: $json.body.nomeGrupo, whatsapp: $json.body.whatsapp, segmento: $json.body.segmento, nicho: $json.body.nicho, responsavel: $json.body.responsavel, servicos: Array.isArray($json.body.servicos) ? $json.body.servicos.join(', ') : String($json.body.servicos || '') }) }}",
