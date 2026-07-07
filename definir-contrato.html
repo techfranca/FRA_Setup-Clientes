@@ -209,15 +209,7 @@
             render();
 
             try {
-                // 1. Atualizar card no ClickUp — descrição + status
-                const descricao = card.description +
-                    '\n\n---\n\n' +
-                    '💰 **Valor:** R$ ' + data.valor + '\n' +
-                    '📋 **Serviços:** ' + servicos.join(', ') + '\n' +
-                    '📅 **Data de Pagamento:** ' + data.data_pagamento +
-                    (data.observacoes ? '\n📝 **Obs:** ' + data.observacoes : '') +
-                    '\n\n_Definido por Gabriel_';
-
+                // 1. Mover card pra "fazer contrato"
                 await fetch(`${CLICKUP_API}/task/${card.id}`, {
                     method: 'PUT',
                     headers: {
@@ -225,8 +217,26 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        description: descricao,
                         status: 'fazer contrato'
+                    })
+                });
+
+                // 2. Adicionar comentário com as informações
+                const comentario =
+                    '💰 **Valor:** R$ ' + data.valor + '\n' +
+                    '📋 **Serviços:** ' + servicos.join(', ') + '\n' +
+                    '📅 **Data de Pagamento:** ' + data.data_pagamento +
+                    (data.observacoes ? '\n📝 **Obs:** ' + data.observacoes : '') +
+                    '\n\n_Definido por Gabriel_';
+
+                await fetch(`${CLICKUP_API}/task/${card.id}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': CLICKUP_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        comment_text: comentario
                     })
                 });
 
