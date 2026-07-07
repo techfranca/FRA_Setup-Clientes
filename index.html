@@ -1,914 +1,471 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Franca Assessoria — Setup de Novo Cliente</title>
-  <meta name="description" content="Ferramenta interna da Franca Assessoria para configurar o setup operacional de um novo cliente.">
-
-  <!-- Favicon: logo real da Franca -->
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
-
-  <!-- Tipografia OFICIAL da Franca (MIV): Poppins (títulos/wordmark) + Montserrat (corpo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-
-  <!-- Tailwind (utilitários) + configuração de marca -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'franca-green': '#7DE08D',
-            'franca-green-deep': '#4b8655', // verde escuro p/ texto — oficial MIV (AA)
-            'franca-dark': '#081534',
-            'franca-dark-soft': '#1a2b52',
-          },
-          fontFamily: {
-            'sans': ['Montserrat', 'system-ui', 'sans-serif'],
-            'display': ['Poppins', 'system-ui', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    /* ============================================================
-       TOKENS DE MARCA (fonte única de cor/raio/sombra) — do MIV 2.0
-       Mesmos tokens do franca-contratos para consistência total.
-       ============================================================ */
-    :root {
-      --navy: #081534;
-      --navy-soft: #1a2b52;
-      --green: #7DE08D;           /* Verde Normal (MIV) */
-      --green-hover: #71ca7f;     /* Verde Normal :hover (MIV) */
-      --green-dark: #5ea86a;      /* Verde Dark (MIV) */
-      --green-deep: #4b8655;      /* Verde Dark :hover — texto sobre claro, AA (MIV) */
-      --green-tint: #f2fcf4;      /* Verde Light — fundo suave (MIV) */
-      --green-soft: #d7f5dc;      /* Verde Light :active (MIV) */
-      --green-line: #cdeed7;      /* bordas/realces */
-      --green-fold: #598F74;      /* verde escuro da dobra (MIV) */
-      --paper: #fafcfa;           /* fundo base levemente esverdeado */
-      --card: #ffffff;
-      --ink: #0f1d3a;             /* texto principal */
-      --ink-soft: #5b6b86;        /* texto secundário */
-      --ink-mute: #8a97ad;        /* placeholders/rótulos */
-      --line: #e7ecf3;            /* divisórias */
-      --danger: #e11d48;
-      --radius: 18px;
-      --radius-sm: 12px;
-      --shadow-sm: 0 1px 2px rgba(8,21,52,.05), 0 1px 3px rgba(8,21,52,.04);
-      --shadow-md: 0 12px 40px -12px rgba(8,21,52,.16);
-      --shadow-lg: 0 24px 60px -20px rgba(8,21,52,.28);
-      --ease: cubic-bezier(.16,1,.3,1);
-    }
-
-    * { -webkit-tap-highlight-color: transparent; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Montserrat', system-ui, sans-serif;
-      color: var(--ink);
-      background: var(--paper);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    /* Títulos em Poppins (fonte oficial da marca) */
-    h1, h2, h3, h4 { font-family: 'Poppins', system-ui, sans-serif; letter-spacing: -.02em; }
-
-    /* ============================================================
-       FUNDO ATMOSFÉRICO
-       Sem "blobs" borrados (cara de IA): brilhos suaves fixos +
-       trama diagonal fininha que ecoa o slant da logo. Estático =
-       zero custo de animação/CLS.
-       ============================================================ */
-    .bg-atmos {
-      position: fixed; inset: 0; z-index: -2; pointer-events: none;
-      background:
-        radial-gradient(60rem 40rem at 8% -8%, rgba(125,224,141,.22), transparent 60%),
-        radial-gradient(50rem 40rem at 108% 12%, rgba(26,43,82,.10), transparent 55%),
-        var(--paper);
-    }
-    /* Trama diagonal (mesmo ângulo do paralelogramo da logo) */
-    .bg-grid {
-      position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
-      background-image: repeating-linear-gradient(
-        -18deg, rgba(8,21,52,.035) 0 1px, transparent 1px 26px);
-      mask-image: linear-gradient(180deg, #000, transparent 78%);
-    }
-
-    /* ============================================================
-       ANIMAÇÃO DE ENTRADA (uma orquestração no load, com stagger)
-       ============================================================ */
-    @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-    .rise { animation: rise .6s var(--ease) both; }
-    .d1 { animation-delay: .06s; } .d2 { animation-delay: .12s; }
-    .d3 { animation-delay: .18s; } .d4 { animation-delay: .24s; }
-    @media (prefers-reduced-motion: reduce) {
-      .rise { animation: none; }
-      html { scroll-behavior: auto; }
-    }
-
-    /* ============================================================
-       HEADER
-       ============================================================ */
-    .site-header {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(255,255,255,.72);
-      backdrop-filter: saturate(180%) blur(14px);
-      -webkit-backdrop-filter: saturate(180%) blur(14px);
-      border-bottom: 1px solid rgba(8,21,52,.06);
-    }
-    .tag-chip {
-      font-size: .7rem; font-weight: 600; letter-spacing: .04em;
-      color: var(--green-deep); background: var(--green-tint);
-      border: 1px solid var(--green-line);
-      padding: .35rem .7rem; border-radius: 999px; text-transform: uppercase;
-      display: inline-flex; align-items: center; gap: .4rem;
-    }
-    .tag-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-dark); }
-
-    /* ============================================================
-       CARDS
-       ============================================================ */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* ============================================================
-       INPUTS
-       ============================================================ */
-    .field-label {
-      display: block; font-size: .78rem; font-weight: 600;
-      color: var(--ink-soft); margin-bottom: .38rem;
-    }
-    .input {
-      /* Densidade operacional: campos mais baixos (~46px) p/ reduzir scroll */
-      width: 100%; padding: .68rem 1rem;
-      background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm);
-      font-size: .93rem; color: var(--ink); font-family: inherit;
-      transition: border-color .2s, box-shadow .2s, background .2s;
-    }
-    .input::placeholder { color: var(--ink-mute); }
-    .input:hover { border-color: #d3dbe6; }
-    .input:focus {
-      outline: none; border-color: var(--green);
-      box-shadow: 0 0 0 4px rgba(125,224,141,.22);
-    }
-    .input.error { border-color: #fda4af; background: #fff5f6; }
-    select.input { cursor: pointer; appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235b6b86' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem;
-    }
-
-    /* Título de seção com marcador diagonal verde (motivo do slant da logo) */
-    .section-title {
-      display: flex; align-items: center; gap: .65rem;
-      font-size: 1.05rem; font-weight: 600; color: var(--navy);
-    }
-    .section-title::before {
-      content: ""; width: 12px; height: 20px; flex: none;
-      background: var(--green); border-radius: 3px; transform: skewX(-10deg);
-    }
-    .eyebrow {
-      font-size: .72rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
-      color: #6b7890; /* escurecido p/ passar AA em texto pequeno */
-    }
-
-    /* Mensagem de erro inline (perto do campo) */
-    .error-msg { color: var(--danger); font-size: .78rem; margin-top: .35rem; display: none; }
-    .error-msg.show { display: block; }
-
-    /* Painel de info do cliente selecionado (verde suave da marca) */
-    /* Info do cliente: resumo horizontal compacto (aproveita a largura, pouca altura) */
-    .client-info {
-      background: var(--green-tint); border: 1px solid var(--green-line);
-      border-radius: var(--radius-sm); padding: .7rem .9rem; margin-top: .5rem;
-      display: flex; flex-wrap: wrap; gap: .35rem 1.15rem;
-    }
-    .client-info span { font-size: .8rem; color: var(--ink); }
-    .client-info b { color: var(--green-deep); font-weight: 600; }
-
-    /* ============================================================
-       CHECKBOX DE SERVIÇOS (cards selecionáveis, estilo premium)
-       ============================================================ */
-    .check-card {
-      display: flex; align-items: center; gap: .7rem; cursor: pointer;
-      background: #fff; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
-      padding: .85rem 1rem; transition: all .2s var(--ease);
-    }
-    .check-card:hover { border-color: #d3dbe6; transform: translateY(-1px); }
-    .check-box {
-      width: 20px; height: 20px; flex: none; border-radius: 6px;
-      border: 2px solid #cbd5e1; display: grid; place-items: center;
-      transition: all .2s var(--ease); background: #fff;
-    }
-    .check-box svg { width: 12px; height: 12px; color: #fff; opacity: 0; transform: scale(.5); transition: all .2s var(--ease); }
-    .check-card input { position: absolute; opacity: 0; pointer-events: none; }
-    .check-card input:checked + .check-box { border-color: var(--green-deep); background: var(--green-deep); }
-    .check-card input:checked + .check-box svg { opacity: 1; transform: scale(1); }
-    .check-card:has(input:checked) { border-color: var(--green); background: var(--green-tint); }
-    .check-card input:focus-visible + .check-box { outline: 3px solid var(--green); outline-offset: 2px; }
-    .check-label { font-size: .88rem; font-weight: 500; color: var(--ink); }
-
-    /* ============================================================
-       BOTÃO PRIMÁRIO (navy + brilho verde diagonal no hover)
-       ============================================================ */
-    .btn {
-      width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
-      background: var(--navy); color: #fff; font-weight: 600; font-size: 1.02rem;
-      font-family: inherit; white-space: nowrap;
-      padding: 1.05rem 2rem; border-radius: var(--radius-sm); border: none; cursor: pointer;
-      position: relative; overflow: hidden;
-      box-shadow: 0 12px 26px -12px rgba(8,21,52,.5);
-      transition: transform .2s var(--ease), box-shadow .2s var(--ease), background .2s;
-    }
-    .btn::before { /* brilho verde diagonal no hover */
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(100deg, transparent 30%, rgba(125,224,141,.28) 50%, transparent 70%);
-      transform: translateX(-120%); transition: transform .6s var(--ease);
-    }
-    .btn:hover:not(:disabled) { transform: translateY(-2px); background: #0b1c44; box-shadow: 0 18px 34px -14px rgba(8,21,52,.6); }
-    .btn:hover:not(:disabled)::before { transform: translateX(120%); }
-    .btn:active:not(:disabled) { transform: translateY(0); }
-    .btn:disabled { opacity: .6; cursor: not-allowed; }
-    .btn:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
-
-    /* Botão verde (ações de WhatsApp) */
-    .btn-green { background: var(--green-deep); box-shadow: 0 12px 26px -12px rgba(75,134,85,.55); }
-    .btn-green:hover:not(:disabled) { background: #3f7449; box-shadow: 0 18px 34px -14px rgba(75,134,85,.6); }
-
-    /* Botão secundário (contorno) */
-    .btn-ghost {
-      width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: .55rem;
-      background: transparent; color: var(--ink-soft); font-weight: 600; font-size: .95rem;
-      font-family: inherit; white-space: nowrap;
-      padding: .95rem 2rem; border-radius: var(--radius-sm); border: 1px solid var(--line); cursor: pointer;
-      transition: all .2s var(--ease);
-    }
-    .btn-ghost:hover { border-color: #d3dbe6; color: var(--navy); background: #fff; }
-
-    /* Divisória fina */
-    .rule { height: 1px; background: var(--line); border: 0; }
-
-    /* ============================================================
-       LAYOUT OPERACIONAL (painel largo em 2 colunas no desktop)
-       ============================================================ */
-    /* Painel lateral de serviços — destaca-se do card branco */
-    .services-side {
-      background: var(--paper); border: 1px solid var(--line);
-      border-radius: var(--radius-sm); padding: 1.05rem 1.1rem; align-self: start;
-    }
-
-    /* Barra de ações (desktop: à direita, integrada ao painel) */
-    .action-bar {
-      display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
-      margin-top: 1.15rem;
-    }
-    .action-bar .btn, .action-bar .btn-ghost { width: auto; }
-
-    /* Mobile: barra sticky no rodapé da viewport, sangrando até a borda do card */
-    @media (max-width: 640px) {
-      .action-bar {
-        position: sticky; bottom: 0; z-index: 40;
-        flex-direction: column-reverse; gap: .6rem;
-        margin: 1.25rem -1.5rem -1.5rem;               /* card p-6 = 1.5rem */
-        padding: .85rem 1.5rem calc(.85rem + env(safe-area-inset-bottom, 0px));
-        background: rgba(255,255,255,.94);
-        backdrop-filter: saturate(180%) blur(10px);
-        -webkit-backdrop-filter: saturate(180%) blur(10px);
-        border-top: 1px solid var(--line);
-        border-radius: 0 0 var(--radius) var(--radius);
-      }
-      .action-bar .btn, .action-bar .btn-ghost { width: 100%; }
-    }
-
-    /* Spinners */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
-    .spinner-dark { width: 26px; height: 26px; border: 2px solid rgba(8,21,52,.1); border-top-color: var(--green-dark); border-radius: 50%; animation: spin .6s linear infinite; margin: 0 auto; }
-
-    /* Faixa de confiança/status */
-    .trust { display: flex; align-items: center; justify-content: center; gap: .55rem; font-size: .82rem; color: var(--ink-soft); }
-
-    /* Link do rodapé */
-    .foot-link { color: var(--green-deep); font-weight: 600; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s; }
-    .foot-link:hover { border-color: var(--green-deep); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franca Assessoria - Setup Novo Cliente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --franca-green: #7DE08D; --franca-dark: #081534; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
+        .blob { position: fixed; filter: blur(80px); z-index: -1; opacity: 0.6; animation: float 10s ease-in-out infinite; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #dcfce3; }
+        .blob-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #e0f2fe; animation-delay: 2s; }
+        .blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: #f0fdf4; animation-delay: 4s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, 40px); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .custom-input { width: 100%; padding: 1rem 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; color: #1e293b; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; }
+        .custom-input:hover { border-color: #cbd5e1; background-color: #fff; }
+        .custom-input:focus { outline: none; background-color: #fff; border-color: #7DE08D; box-shadow: 0 0 0 4px rgba(125, 224, 141, 0.15); transform: translateY(-1px); }
+        .custom-input.error { border-color: #fda4af; background-color: #fff1f2; }
+        label { font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem; display: block; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(8, 21, 52, 0.05); }
+        .btn-premium { background: #081534; color: white; font-weight: 600; padding: 1rem 2rem; border-radius: 0.75rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; cursor: pointer; border: none; font-size: 1rem; }
+        .btn-premium:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(8, 21, 52, 0.3); background: #0a1b42; }
+        .btn-premium:disabled { opacity: 0.7; cursor: not-allowed; }
+        select.custom-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem; }
+        .error-msg { color: #e11d48; font-size: 0.8rem; margin-top: 0.25rem; display: none; }
+        .error-msg.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .spinner-dark { width: 24px; height: 24px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #7DE08D; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 2rem auto; }
+        .success-icon { width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+        .client-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-top: 0.5rem; }
+        .client-info p { font-size: 0.85rem; color: #475569; margin: 0.25rem 0; }
+        .client-info strong { color: #1e293b; }
+    </style>
 </head>
+<body class="bg-gradient-to-br from-white via-slate-50 to-blue-50">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
-<body class="min-h-screen relative overflow-x-hidden flex flex-col">
-  <div class="bg-atmos"></div>
-  <div class="bg-grid"></div>
-
-  <!-- ============================ HEADER ============================ -->
-  <header class="site-header">
-    <div class="max-w-[1100px] mx-auto px-5 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <img src="logo.png" alt="Logotipo da Franca Assessoria" class="h-9 w-auto" width="43" height="36">
-        <span class="hidden sm:block h-6 w-px bg-slate-200"></span>
-        <span class="hidden sm:block font-display font-semibold text-lg text-franca-dark tracking-tight">Franca</span>
-      </div>
-      <span class="tag-chip"><span class="dot"></span>Setup Interno</span>
+    <div class="min-h-screen flex flex-col">
+        <main class="flex-1 px-4 py-12 md:py-20 max-w-2xl mx-auto w-full">
+            <div id="app"></div>
+        </main>
+        <footer class="border-t border-slate-100 bg-white/50 backdrop-blur-sm py-6 text-center text-sm text-slate-500">
+            <p>&copy; Franca Assessoria. Uso interno.</p>
+        </footer>
     </div>
-  </header>
 
-  <!-- ============================ CONTEÚDO ============================ -->
-  <main class="flex-1 w-full max-w-[1100px] mx-auto px-5 sm:px-6 pt-5 pb-6">
-    <div id="app"></div>
-  </main>
+    <script>
+        const WEBHOOK_URL = 'https://webhooks.francaassessoria.com/webhook/setup-cliente';
+        const SHEET_ID = '1txY9K4xIWEL8BYWhVoPr33GYPlp0sK4nm3Dm63lYFq8';
+        const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
-  <!-- ============================ RODAPÉ (discreto, fora do fluxo principal) ============================ -->
-  <footer class="w-full max-w-[1100px] mx-auto px-5 sm:px-6 pb-5 pt-1 text-center">
-    <p class="text-xs text-slate-400">
-      Feito por
-      <a class="foot-link"
-         href="https://wa.me/5521991097451?text=Ol%C3%A1!%20Vim%20pela%20ferramenta%20de%20setup%20e%20gostaria%20de%20falar%20com%20a%20Franca%20Marketing."
-         target="_blank" rel="noopener">Franca Marketing</a>
-      · © <span id="year"></span> Franca Assessoria · Uso interno
-    </p>
-  </footer>
+        let clientes = [];
+        let isLoading = false;
+        let lastSubmittedData = null;
 
-  <script>
-    // ============================================================
-    // CONFIGURAÇÃO
-    // ============================================================
-    const WEBHOOK_URL = 'https://webhooks.francaassessoria.com/webhook/setup-cliente';
-    const SHEET_ID = '1txY9K4xIWEL8BYWhVoPr33GYPlp0sK4nm3Dm63lYFq8';
-    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+        // === CARREGAR CLIENTES DA PLANILHA ===
+        async function carregarClientes() {
+            document.getElementById('app').innerHTML = `
+                <div class="text-center py-20">
+                    <div class="spinner-dark"></div>
+                    <p class="text-slate-500 mt-4">Carregando clientes...</p>
+                </div>`;
 
-    // Estado da aplicação
-    let clientes = [];
-    let isLoading = false;
-    let lastSubmittedData = null;
+            try {
+                const response = await fetch(GVIZ_URL);
+                const csv = await response.text();
+                const linhas = parseCSV(csv);
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+                if (linhas.length < 2) {
+                    clientes = [];
+                    render();
+                    return;
+                }
 
-    // ============================================================
-    // CARREGAR CLIENTES DA PLANILHA (GViz → CSV)
-    // ============================================================
-    async function carregarClientes() {
-      document.getElementById('app').innerHTML = `
-        <div class="card rise p-10 text-center" role="status" aria-live="polite" style="box-shadow:var(--shadow-md)">
-          <div class="spinner-dark" role="status" aria-label="Carregando"></div>
-          <p class="text-slate-500 mt-4 text-sm">Carregando clientes pendentes…</p>
-        </div>`;
+                const headers = linhas[0];
+                const colNome = headers.indexOf('Razão Social / Nome Completo');
+                const colTAG = headers.indexOf('TAG');
+                const colTipo = headers.indexOf('Tipo');
+                const colCNPJ = headers.indexOf('CNPJ / CPF');
+                const colEmail = headers.indexOf('E-mail');
+                const colSocio = headers.indexOf('Nome do Sócio/Responsável');
+                const colCelular = headers.indexOf('Celular');
 
-      try {
-        // Timeout de 10s: se o GViz travar, cai no estado de erro (não fica spinner infinito)
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 10000);
-        const response = await fetch(GVIZ_URL, { signal: ctrl.signal });
-        clearTimeout(t);
-        const csv = await response.text();
-        const linhas = parseCSV(csv);
+                clientes = [];
+                for (let i = 1; i < linhas.length; i++) {
+                    const row = linhas[i];
+                    const nome = (row[colNome] || '').trim();
+                    const tag = (row[colTAG] || '').trim();
 
-        if (linhas.length < 2) {
-          clientes = [];
-          render();
-          return;
+                    // Só mostra clientes que TÊM nome mas NÃO têm TAG (setup pendente)
+                    if (nome && !tag) {
+                        clientes.push({
+                            rowNumber: i + 1, // 1-based, contando header
+                            nome: nome,
+                            tipo: (row[colTipo] || '').trim(),
+                            cnpjCpf: (row[colCNPJ] || '').trim(),
+                            email: (row[colEmail] || '').trim(),
+                            socio: (row[colSocio] || '').trim(),
+                            celular: (row[colCelular] || '').trim()
+                        });
+                    }
+                }
+
+                render();
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center">
+                        <p class="text-red-500 mb-4">Erro ao carregar clientes da planilha.</p>
+                        <button onclick="carregarClientes()" class="btn-premium">Tentar novamente</button>
+                    </div>`;
+            }
         }
 
-        const headers = linhas[0];
-        const colNome = headers.indexOf('Razão Social / Nome Completo');
-        const colTAG = headers.indexOf('TAG');
-        const colTipo = headers.indexOf('Tipo');
-        const colCNPJ = headers.indexOf('CNPJ / CPF');
-        const colEmail = headers.indexOf('E-mail');
-        const colSocio = headers.indexOf('Nome do Sócio/Responsável');
-        const colCelular = headers.indexOf('Celular');
+        // === PARSE CSV ===
+        function parseCSV(csv) {
+            const linhas = [];
+            let current = [];
+            let field = '';
+            let inQuotes = false;
 
-        clientes = [];
-        for (let i = 1; i < linhas.length; i++) {
-          const row = linhas[i];
-          const nome = (row[colNome] || '').trim();
-          const tag = (row[colTAG] || '').trim();
-
-          // Só mostra clientes que TÊM nome mas NÃO têm TAG (setup pendente)
-          if (nome && !tag) {
-            clientes.push({
-              rowNumber: i + 1, // 1-based, contando header
-              nome: nome,
-              tipo: (row[colTipo] || '').trim(),
-              cnpjCpf: (row[colCNPJ] || '').trim(),
-              email: (row[colEmail] || '').trim(),
-              socio: (row[colSocio] || '').trim(),
-              celular: (row[colCelular] || '').trim()
-            });
-          }
+            for (let i = 0; i < csv.length; i++) {
+                const c = csv[i];
+                if (inQuotes) {
+                    if (c === '"' && csv[i + 1] === '"') { field += '"'; i++; }
+                    else if (c === '"') { inQuotes = false; }
+                    else { field += c; }
+                } else {
+                    if (c === '"') { inQuotes = true; }
+                    else if (c === ',') { current.push(field); field = ''; }
+                    else if (c === '\n' || (c === '\r' && csv[i + 1] === '\n')) {
+                        current.push(field); field = '';
+                        linhas.push(current); current = [];
+                        if (c === '\r') i++;
+                    } else { field += c; }
+                }
+            }
+            if (field || current.length) { current.push(field); linhas.push(current); }
+            return linhas;
         }
 
-        render();
-      } catch (error) {
-        document.getElementById('app').innerHTML = renderError('Não foi possível carregar os clientes da planilha.');
-      }
-    }
-
-    // ============================================================
-    // PARSE CSV (respeita aspas e quebras de linha dentro de campos)
-    // ============================================================
-    function parseCSV(csv) {
-      const linhas = [];
-      let current = [];
-      let field = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < csv.length; i++) {
-        const c = csv[i];
-        if (inQuotes) {
-          if (c === '"' && csv[i + 1] === '"') { field += '"'; i++; }
-          else if (c === '"') { inQuotes = false; }
-          else { field += c; }
-        } else {
-          if (c === '"') { inQuotes = true; }
-          else if (c === ',') { current.push(field); field = ''; }
-          else if (c === '\n' || (c === '\r' && csv[i + 1] === '\n')) {
-            current.push(field); field = '';
-            linhas.push(current); current = [];
-            if (c === '\r') i++;
-          } else { field += c; }
+        // === RENDER ===
+        function render() {
+            document.getElementById('app').innerHTML = renderForm();
+            // Setup event listener pro select de cliente
+            const sel = document.getElementById('cliente');
+            if (sel) {
+                sel.addEventListener('change', function() {
+                    const idx = this.value;
+                    const info = document.getElementById('client-info');
+                    if (idx === '') { info.style.display = 'none'; return; }
+                    const c = clientes[idx];
+                    info.style.display = 'block';
+                    info.innerHTML = `
+                        <p><strong>Tipo:</strong> ${c.tipo || '—'}</p>
+                        <p><strong>CNPJ/CPF:</strong> ${c.cnpjCpf || '—'}</p>
+                        <p><strong>E-mail:</strong> ${c.email || '—'}</p>
+                        ${c.socio ? `<p><strong>Responsável:</strong> ${c.socio}</p>` : ''}
+                        ${c.celular ? `<p><strong>Celular:</strong> ${c.celular}</p>` : ''}
+                    `;
+                });
+            }
         }
-      }
-      if (field || current.length) { current.push(field); linhas.push(current); }
-      return linhas;
-    }
 
-    // Escapa texto vindo da planilha antes de injetar no HTML (evita quebrar layout / injeção)
-    function esc(str) {
-      return String(str == null ? '' : str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
+        function renderForm() {
+            const clienteOptions = clientes.length === 0
+                ? '<option value="" disabled selected>Nenhum cliente pendente de setup</option>'
+                : '<option value="" disabled selected>Selecione o cliente</option>' +
+                  clientes.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
 
-    // ============================================================
-    // RENDER PRINCIPAL
-    // ============================================================
-    function render() {
-      // Estado vazio dedicado: nenhum cliente pendente de setup
-      if (clientes.length === 0) {
-        document.getElementById('app').innerHTML = renderEmpty();
-        focarTitulo();
-        return;
-      }
+            return `
+                <div class="animate-slide-up">
+                    <div class="text-center mb-10">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-slate-200 shadow-sm mb-6">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            <span class="text-sm text-slate-600 font-medium">Setup Interno</span>
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-3">Novo Cliente</h1>
+                        <p class="text-slate-500">Selecione o cliente e preencha os dados operacionais.</p>
+                    </div>
 
-      document.getElementById('app').innerHTML = renderForm();
+                    <div class="glass-card rounded-2xl p-8 md:p-10">
+                        <form id="setupForm" onsubmit="handleSubmit(event)">
+                            <div class="space-y-5">
 
-      // Listener do select de cliente → mostra painel de info
-      const sel = document.getElementById('cliente');
-      if (sel) {
-        sel.addEventListener('change', function () {
-          const idx = this.value;
-          const info = document.getElementById('client-info');
-          if (idx === '') { info.style.display = 'none'; return; }
-          const c = clientes[idx];
-          info.style.display = 'flex';
-          info.innerHTML = `
-            <span><b>Tipo:</b> ${esc(c.tipo) || '—'}</span>
-            <span><b>CNPJ/CPF:</b> ${esc(c.cnpjCpf) || '—'}</span>
-            <span><b>E-mail:</b> ${esc(c.email) || '—'}</span>
-            ${c.socio ? `<span><b>Responsável:</b> ${esc(c.socio)}</span>` : ''}
-            ${c.celular ? `<span><b>Celular:</b> ${esc(c.celular)}</span>` : ''}`;
-        });
-      }
-    }
+                                <div>
+                                    <label for="cliente">Cliente <span class="text-red-400">*</span></label>
+                                    <select id="cliente" class="custom-input" required>
+                                        ${clienteOptions}
+                                    </select>
+                                    <div id="client-info" class="client-info" style="display:none;"></div>
+                                    <p class="error-msg" id="cliente-error">Selecione um cliente</p>
+                                </div>
 
-    // ---------------------------- ESTADO VAZIO ----------------------------
-    function renderEmpty() {
-      return `
-        <div class="rise d1 max-w-lg mx-auto">
-          <div class="card p-8 sm:p-10 text-center" style="box-shadow:var(--shadow-md)">
-            <div class="mx-auto mb-6 w-16 h-16 rounded-2xl grid place-items-center" style="background:var(--green-tint);border:1px solid var(--green-line)">
-              <svg class="w-8 h-8" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="var(--green-deep)" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-            </div>
-            <h1 tabindex="-1" class="text-2xl font-semibold text-franca-dark mb-2" style="text-wrap:balance">Nenhum cliente pendente</h1>
-            <p class="text-slate-500 mb-7" style="text-wrap:pretty">Não há clientes aguardando setup no momento. Cadastre o cliente na planilha e atualize a lista.</p>
-            <button onclick="carregarClientes()" class="btn">${refreshIcon()} Atualizar lista</button>
-          </div>
-        </div>`;
-    }
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="nomeGrupo">Nome no Grupo <span class="text-red-400">*</span></label>
+                                        <input type="text" id="nomeGrupo" class="custom-input" placeholder="Como aparece no grupo WhatsApp" required>
+                                        <p class="error-msg" id="nomeGrupo-error">Campo obrigatório</p>
+                                    </div>
 
-    // ---------------------------- FORMULÁRIO (painel operacional) ----------------------------
-    function renderForm() {
-      const clienteOptions =
-        '<option value="" disabled selected>Selecione o cliente</option>' +
-        clientes.map((c, i) => `<option value="${i}">${esc(c.nome)}</option>`).join('');
+                                    <div>
+                                        <label for="tag">TAG <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tag" class="custom-input" placeholder="Ex: LIVEN, REALP" required style="text-transform: uppercase;">
+                                        <p class="error-msg" id="tag-error">Campo obrigatório</p>
+                                    </div>
+                                </div>
 
-      return `
-        <!-- Cabeçalho compacto, alinhado à esquerda (tela de operação, não landing) -->
-        <div class="rise d1 mb-4">
-          <h1 class="text-2xl sm:text-[1.7rem] font-semibold text-franca-dark leading-tight">Configurar novo cliente</h1>
-          <p class="text-slate-500 text-sm mt-1">Selecione o cliente pendente e preencha os dados operacionais para ativá-lo.</p>
-        </div>
+                                <div>
+                                    <label for="whatsapp">WhatsApp do Cliente <span class="text-red-400">*</span></label>
+                                    <input type="tel" id="whatsapp" class="custom-input" placeholder="5521999999999" required>
+                                    <p class="error-msg" id="whatsapp-error">Informe com DDD e país (55)</p>
+                                </div>
 
-        <form id="setupForm" class="rise d2" novalidate onsubmit="handleSubmit(event)">
-          <div class="card p-6 sm:p-7" style="box-shadow:var(--shadow-md)">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="segmento">Segmento <span class="text-red-400">*</span></label>
+                                        <select id="segmento" class="custom-input" required>
+                                            <option value="" disabled selected>Selecione</option>
+                                            <option value="Infoproduto">Infoproduto</option>
+                                            <option value="Imobiliária">Imobiliária</option>
+                                            <option value="Negócio Local">Negócio Local</option>
+                                            <option value="Inside Sales">Inside Sales</option>
+                                            <option value="E-commerce">E-commerce</option>
+                                        </select>
+                                        <p class="error-msg" id="segmento-error">Selecione um segmento</p>
+                                    </div>
 
-            <!-- Cliente: largura total no topo do painel -->
-            <div class="mb-6">
-              <label class="field-label" for="cliente">Cliente pendente <span style="color:var(--danger)">*</span></label>
-              <select id="cliente" class="input" required>
-                ${clienteOptions}
-              </select>
-              <div id="client-info" class="client-info" style="display:none;"></div>
-              <p class="error-msg" id="cliente-error">Selecione um cliente</p>
-            </div>
+                                    <div>
+                                        <label for="nicho">Nicho <span class="text-red-400">*</span></label>
+                                        <input type="text" id="nicho" class="custom-input" placeholder="Ex: Arquitetos, Advocacia" required>
+                                        <p class="error-msg" id="nicho-error">Campo obrigatório</p>
+                                    </div>
+                                </div>
 
-            <!-- Desktop: 2 colunas (dados = principal | serviços = lateral). Mobile: empilhado -->
-            <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-7">
+                                <div>
+                                    <label for="responsavel">Responsável Tráfego <span class="text-red-400">*</span></label>
+                                    <select id="responsavel" class="custom-input" required>
+                                        <option value="" disabled selected>Selecione</option>
+                                        <option value="Gabriel">Gabriel</option>
+                                        <option value="Bruna">Bruna</option>
+                                        <option value="Leo">Leo</option>
+                                        <option value="Guilherme">Guilherme</option>
+                                        <option value="Davidson">Davidson</option>
+                                    </select>
+                                    <p class="error-msg" id="responsavel-error">Selecione um responsável</p>
+                                </div>
 
-              <!-- COLUNA PRINCIPAL — Dados operacionais -->
-              <div class="space-y-4">
-                <div class="section-title">Dados operacionais</div>
+                            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="field-label" for="nomeGrupo">Nome no Grupo <span style="color:var(--danger)">*</span></label>
-                    <input type="text" id="nomeGrupo" class="input" placeholder="Como aparece no grupo WhatsApp" required>
-                    <p class="error-msg" id="nomeGrupo-error">Campo obrigatório</p>
-                  </div>
-                  <div>
-                    <label class="field-label" for="tag">TAG <span style="color:var(--danger)">*</span></label>
-                    <input type="text" id="tag" class="input" placeholder="Ex: LIVEN, REALP" required style="text-transform:uppercase">
-                    <p class="error-msg" id="tag-error">Campo obrigatório</p>
-                  </div>
+                            <div class="mt-8">
+                                <button type="submit" class="btn-premium" id="submitBtn" ${isLoading || clientes.length === 0 ? 'disabled' : ''}>
+                                    ${isLoading ? '<div class="spinner"></div> Criando setup...' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> Criar Setup do Cliente'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <div>
-                  <label class="field-label" for="whatsapp">WhatsApp do Cliente <span style="color:var(--danger)">*</span></label>
-                  <input type="tel" id="whatsapp" class="input" placeholder="5521999999999" inputmode="numeric" autocomplete="tel" required>
-                  <p class="error-msg" id="whatsapp-error">Informe com país (55) e DDD</p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="field-label" for="segmento">Segmento <span style="color:var(--danger)">*</span></label>
-                    <select id="segmento" class="input" required>
-                      <option value="" disabled selected>Selecione</option>
-                      <option value="Infoproduto">Infoproduto</option>
-                      <option value="Imobiliária">Imobiliária</option>
-                      <option value="Negócio Local">Negócio Local</option>
-                      <option value="Inside Sales">Inside Sales</option>
-                      <option value="E-commerce">E-commerce</option>
-                    </select>
-                    <p class="error-msg" id="segmento-error">Selecione um segmento</p>
-                  </div>
-                  <div>
-                    <label class="field-label" for="nicho">Nicho <span style="color:var(--danger)">*</span></label>
-                    <input type="text" id="nicho" class="input" placeholder="Ex: Arquitetos, Advocacia" required>
-                    <p class="error-msg" id="nicho-error">Campo obrigatório</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="field-label" for="responsavel">Responsável Tráfego <span style="color:var(--danger)">*</span></label>
-                  <select id="responsavel" class="input" required>
-                    <option value="" disabled selected>Selecione</option>
-                    <option value="Gabriel">Gabriel</option>
-                    <option value="Bruna">Bruna</option>
-                    <option value="Leo">Leo</option>
-                    <option value="Guilherme">Guilherme</option>
-                    <option value="Davidson">Davidson</option>
-                  </select>
-                  <p class="error-msg" id="responsavel-error">Selecione um responsável</p>
-                </div>
-              </div>
-
-              <!-- COLUNA LATERAL — Serviços contratados -->
-              <aside class="services-side mt-6 lg:mt-0">
-                <div class="section-title mb-3">Serviços contratados <span style="color:var(--danger)">*</span></div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
-                  ${renderServico('Tráfego Pago')}
-                  ${renderServico('Produção de Conteúdo')}
-                  ${renderServico('Automações')}
-                  ${renderServico('Criação de Páginas')}
-                  ${renderServico('Edição de Anúncios')}
-                  ${renderServico('Implementação Produto Digital')}
-                </div>
-                <p class="error-msg" id="servicos-error">Selecione ao menos um serviço</p>
-              </aside>
-            </div>
-
-            <!-- Barra de ações: integrada ao painel (desktop) · sticky no rodapé (mobile) -->
-            <div class="action-bar">
-              <button type="button" class="btn-ghost" onclick="limparFormulario()">Limpar</button>
-              <button type="submit" class="btn" id="submitBtn" ${isLoading ? 'disabled aria-busy="true"' : ''}>
-                ${isLoading
-                  ? '<div class="spinner" role="status" aria-label="Enviando"></div> Criando setup…'
-                  : `Criar setup do cliente ${arrowIcon()}`}
-              </button>
-            </div>
-          </div>
-        </form>`;
-    }
-
-    // Card de serviço (checkbox premium)
-    function renderServico(nome) {
-      return `
-        <label class="check-card">
-          <input type="checkbox" name="servicos" value="${nome}">
-          <span class="check-box">${checkIcon()}</span>
-          <span class="check-label">${nome}</span>
-        </label>`;
-    }
-
-    // ---------------------------- SUCESSO ----------------------------
-    function renderSuccess(data) {
-      lastSubmittedData = data;
-      return `
-        <div class="rise d1 max-w-lg mx-auto">
-          <div class="card p-8 sm:p-10 text-center" role="status" aria-live="polite" style="box-shadow:var(--shadow-md)">
-            <div class="relative mx-auto mb-7 w-20 h-20">
-              <div class="absolute inset-0 rounded-full" style="background:var(--green);filter:blur(24px);opacity:.5"></div>
-              <div class="relative w-20 h-20 rounded-full grid place-items-center" style="background:linear-gradient(150deg,var(--green),#39c46a);box-shadow:var(--shadow-lg)">
-                <svg class="w-10 h-10 text-franca-dark" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              </div>
-            </div>
-
-            <p class="eyebrow mb-3">Tudo certo</p>
-            <h2 tabindex="-1" class="text-2xl sm:text-3xl font-semibold text-franca-dark mb-2">Setup criado com sucesso!</h2>
-            <p class="text-slate-500 mb-7">O cliente <strong class="text-franca-dark">${esc(data.nomeGrupo)}</strong> (${esc(data.tag)}) foi configurado.</p>
-
-            <div class="rounded-2xl p-5 text-left mb-7" style="background:var(--green-tint);border:1px solid var(--green-line)">
-              <div class="space-y-2.5">
-                ${linhaStatus('Planilha de clientes', 'Adicionado')}
-                ${linhaStatus('Planilha de relacionamento', 'Ativo')}
-                ${linhaStatus('Planilha de onboarding', 'Atualizada')}
-                ${linhaStatus('Responsável', esc(data.responsavel))}
-              </div>
-            </div>
-
-            <div class="space-y-3">
-              <button onclick="criarGrupo()" class="btn btn-green" id="btnGrupo">
-                ${usersIcon()} Criar Grupo WhatsApp
-              </button>
-
-              <div id="grupo-participantes" style="display:none;"></div>
-
-              <button onclick="carregarClientes()" class="btn-ghost">
-                ${plusIcon()} Cadastrar outro cliente
-              </button>
-            </div>
-          </div>
-        </div>`;
-    }
-
-    // Linha de status (label + selo verde) do card de sucesso
-    function linhaStatus(label, valor) {
-      return `
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-sm text-slate-600">${label}</span>
-          <span class="inline-flex items-center gap-1.5 text-xs font-semibold" style="color:var(--green-deep)">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            ${valor}
-          </span>
-        </div>`;
-    }
-
-    // ---------------------------- CRIAÇÃO DE GRUPO ----------------------------
-    const EQUIPE = [
-      { nome: 'Gabriel', numero: '5521991097451' },
-      { nome: 'Bruna', numero: '5521996393929' },
-      { nome: 'Leo', numero: '5521964401348' },
-      { nome: 'Guilherme', numero: '5521964535810' },
-      { nome: 'Davidson', numero: '5521990268273' }
-    ];
-
-    function criarGrupo() {
-      const btn = document.getElementById('btnGrupo');
-      btn.style.display = 'none';
-
-      const container = document.getElementById('grupo-participantes');
-      const clienteNumero = lastSubmittedData.whatsapp;
-      const clienteNome = esc(lastSubmittedData.nomeGrupo);
-
-      container.style.display = 'block';
-      container.innerHTML = `
-        <div class="rounded-2xl p-5 text-left mb-4" style="background:#fff;border:1px solid var(--line)">
-          <p class="text-sm font-semibold text-slate-700 mb-3">Selecione os participantes do grupo:</p>
-          <div class="space-y-2">
-            <label class="check-card" style="border-color:var(--green-line);background:var(--green-tint)">
-              <input type="checkbox" name="participantes" value="${esc(clienteNumero)}" checked>
-              <span class="check-box">${checkIcon()}</span>
-              <span class="check-label">${clienteNome} <span class="text-slate-400 font-normal">(cliente)</span></span>
-            </label>
-            ${EQUIPE.map(m => `
-            <label class="check-card">
-              <input type="checkbox" name="participantes" value="${m.numero}" checked>
-              <span class="check-box">${checkIcon()}</span>
-              <span class="check-label">${m.nome} <span class="text-slate-400 font-normal">(equipe)</span></span>
-            </label>`).join('')}
-          </div>
-        </div>
-        <button onclick="confirmarGrupo()" class="btn btn-green" id="btnConfirmarGrupo">
-          ${checkCircleIcon()} Confirmar e criar grupo
-        </button>
-        <p class="error-msg text-center mt-3" id="grupo-error" role="alert"></p>`;
-    }
-
-    async function confirmarGrupo() {
-      const btn = document.getElementById('btnConfirmarGrupo');
-      const erro = document.getElementById('grupo-error');
-      erro.classList.remove('show'); // limpa erro anterior
-      const participantes = Array.from(document.querySelectorAll('input[name="participantes"]:checked')).map(el => el.value);
-
-      // Erro fora do botão (mantém o rótulo do botão fixo, em 1 linha)
-      if (participantes.length === 0) {
-        erro.textContent = 'Selecione ao menos um participante.';
-        erro.classList.add('show');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.setAttribute('aria-busy', 'true');
-      btn.innerHTML = '<div class="spinner"></div> Criando grupo…';
-
-      try {
-        const payload = { ...lastSubmittedData, participantes: participantes };
-        const response = await fetch(WEBHOOK_URL + '-grupo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error('Erro');
-
-        document.getElementById('grupo-participantes').innerHTML = `
-          <div class="rounded-2xl p-5 text-center" role="status" style="background:var(--green-tint);border:1px solid var(--green-line)">
-            ${checkCircleIcon('mx-auto mb-2', 32, 'var(--green-deep)')}
-            <p class="text-sm font-semibold" style="color:var(--green-deep)">Grupo criado com ${participantes.length} participante(s)!</p>
-          </div>`;
-      } catch (error) {
-        // Restaura o botão ao estado original e mostra o erro à parte
-        btn.disabled = false;
-        btn.removeAttribute('aria-busy');
-        btn.innerHTML = `${checkCircleIcon()} Confirmar e criar grupo`;
-        erro.textContent = 'Não foi possível criar o grupo. Tente novamente.';
-        erro.classList.add('show');
-      }
-    }
-
-    // ---------------------------- ERRO ----------------------------
-    function renderError(message) {
-      return `
-        <div class="rise d1 max-w-lg mx-auto">
-          <div class="card p-8 sm:p-10 text-center" role="alert" style="box-shadow:var(--shadow-md)">
-            <div class="mx-auto mb-6 w-16 h-16 rounded-full grid place-items-center" style="background:#fef2f2">
-              <svg class="w-8 h-8" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-            </div>
-            <h2 tabindex="-1" class="text-2xl font-semibold text-franca-dark mb-2">Algo deu errado</h2>
-            <p class="text-slate-500 mb-7">${message}</p>
-            <button onclick="carregarClientes()" class="btn">Tentar novamente</button>
-          </div>
-        </div>`;
-    }
-
-    // ============================================================
-    // SUBMISSÃO
-    // ============================================================
-    async function handleSubmit(e) {
-      e.preventDefault();
-
-      // Limpa estados de erro anteriores
-      limparErros();
-
-      const clienteIdx = document.getElementById('cliente').value;
-      const cliente = clientes[clienteIdx];
-
-      const data = {
-        // Dados do cliente selecionado
-        clienteNome: cliente ? cliente.nome : '',
-        rowNumber: cliente ? cliente.rowNumber : null,
-        // Dados operacionais
-        nomeGrupo: document.getElementById('nomeGrupo').value.trim(),
-        tag: document.getElementById('tag').value.trim().toUpperCase(),
-        whatsapp: document.getElementById('whatsapp').value.trim().replace(/\D/g, ''),
-        segmento: document.getElementById('segmento').value,
-        nicho: document.getElementById('nicho').value.trim(),
-        responsavel: document.getElementById('responsavel').value,
-        servicos: Array.from(document.querySelectorAll('input[name="servicos"]:checked')).map(el => el.value),
-        timestamp: new Date().toISOString()
-      };
-
-      // Validação (mensagens inline perto do campo)
-      let hasError = false;
-      if (clienteIdx === '' || clienteIdx === null) { showError('cliente'); hasError = true; }
-      if (!data.nomeGrupo) { showError('nomeGrupo'); hasError = true; }
-      if (!data.tag) { showError('tag'); hasError = true; }
-      if (!data.whatsapp || data.whatsapp.length < 12) { showError('whatsapp'); hasError = true; }
-      if (!data.segmento) { showError('segmento'); hasError = true; }
-      if (!data.nicho) { showError('nicho'); hasError = true; }
-      if (!data.responsavel) { showError('responsavel'); hasError = true; }
-      if (data.servicos.length === 0) { showError('servicos'); hasError = true; }
-
-      if (hasError) {
-        // Leva o foco pro primeiro campo inválido (melhor que só rolar)
-        const primeiroId = ['cliente','nomeGrupo','tag','whatsapp','segmento','nicho','responsavel']
-          .find(id => document.getElementById(id + '-error')?.classList.contains('show'));
-        if (primeiroId) {
-          const campo = document.getElementById(primeiroId);
-          campo?.focus({ preventScroll: true });
-          campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          // Erro é de serviços (sem input focável único)
-          document.getElementById('servicos-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            `;
         }
-        return;
-      }
 
-      isLoading = true;
-      render();
+        function renderSuccess(data) {
+            lastSubmittedData = data;
+            return `
+                <div class="animate-slide-up">
+                    <div class="glass-card rounded-2xl p-8 md:p-10 text-center">
+                        <div class="success-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Setup criado com sucesso!</h2>
+                        <p class="text-slate-500 mb-6">O cliente <strong>${data.nomeGrupo}</strong> (${data.tag}) foi configurado.</p>
 
-      try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!response.ok) throw new Error('Erro no servidor');
+                        <div class="bg-slate-50 rounded-xl p-5 text-left mb-6 space-y-2">
+                            <p class="text-sm text-slate-600"><strong>Planilha de clientes:</strong> Adicionado</p>
+                            <p class="text-sm text-slate-600"><strong>Planilha de relacionamento:</strong> Adicionado como Ativo</p>
+                            <p class="text-sm text-slate-600"><strong>Planilha de onboarding:</strong> Atualizada</p>
+                            <p class="text-sm text-slate-600"><strong>Responsável:</strong> ${data.responsavel}</p>
+                        </div>
 
-        document.getElementById('app').innerHTML = renderSuccess(data);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        focarTitulo();
-      } catch (error) {
-        document.getElementById('app').innerHTML = renderError('Não foi possível conectar ao servidor. Tente novamente.');
-        focarTitulo();
-      }
+                        <div class="space-y-3">
+                            <button onclick="criarGrupo()" class="btn-premium" id="btnGrupo" style="background: #16a34a;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                Criar Grupo WhatsApp
+                            </button>
 
-      isLoading = false;
-    }
+                            <div id="grupo-participantes" style="display:none;"></div>
 
-    // Marca o campo como inválido (visual + a11y) e exibe o erro inline associado
-    function showError(field) {
-      const el = document.getElementById(field);
-      if (el) {
-        el.classList.add('error');
-        el.setAttribute('aria-invalid', 'true');
-        el.setAttribute('aria-describedby', field + '-error');
-      }
-      const err = document.getElementById(field + '-error');
-      if (err) err.classList.add('show');
-    }
+                            <button onclick="carregarClientes()" class="btn-premium" style="background: transparent; color: #475569; border: 1px solid #e2e8f0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                Cadastrar outro cliente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-    // Limpa os estados de inválido (chamado no início de cada submit)
-    function limparErros() {
-      document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
-      document.querySelectorAll('.input').forEach(el => {
-        el.classList.remove('error');
-        el.removeAttribute('aria-invalid');
-        el.removeAttribute('aria-describedby');
-      });
-    }
+        const EQUIPE = [
+            { nome: 'Gabriel', numero: '5521991097451' },
+            { nome: 'Bruna', numero: '5521996393929' },
+            { nome: 'Leo', numero: '5521964401348' },
+            { nome: 'Guilherme', numero: '5521964535810' },
+            { nome: 'Davidson', numero: '5521990268273' }
+        ];
 
-    // Move o foco pro título da nova tela (leitor de tela anuncia a troca)
-    function focarTitulo() {
-      const t = document.querySelector('#app [tabindex="-1"]');
-      if (t) t.focus({ preventScroll: true });
-    }
+        function criarGrupo() {
+            const btn = document.getElementById('btnGrupo');
+            btn.style.display = 'none';
 
-    // Ação "Limpar" da barra: reseta os campos sem sair da tela
-    function limparFormulario() {
-      const form = document.getElementById('setupForm');
-      if (!form) return;
-      form.reset();
-      const info = document.getElementById('client-info');
-      if (info) info.style.display = 'none';
-      limparErros();
-      document.getElementById('cliente')?.focus();
-    }
+            const container = document.getElementById('grupo-participantes');
+            const clienteNumero = lastSubmittedData.whatsapp;
+            const clienteNome = lastSubmittedData.nomeGrupo;
 
-    // ============================================================
-    // ÍCONES (SVG inline reutilizáveis)
-    // ============================================================
-    function arrowIcon() {
-      return `<svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-    }
-    function checkIcon() {
-      return `<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
-    }
-    function usersIcon() {
-      return `<svg class="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
-    }
-    function plusIcon() {
-      return `<svg class="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>`;
-    }
-    function refreshIcon() {
-      return `<svg class="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
-    }
-    function checkCircleIcon(cls = '', size = 20, color = 'currentColor') {
-      return `<svg class="${cls}" aria-hidden="true" width="${size}" height="${size}" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3"/></svg>`;
-    }
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="bg-slate-50 rounded-xl p-5 text-left mb-4">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Selecione os participantes do grupo:</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-2 rounded-lg bg-green-50 border border-green-200">
+                            <input type="checkbox" name="participantes" value="${clienteNumero}" checked class="w-4 h-4 accent-[#7DE08D]">
+                            <span class="text-sm text-slate-700">${clienteNome} <span class="text-slate-400">(cliente)</span></span>
+                        </label>
+                        ${EQUIPE.map(m => `
+                        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 transition-all">
+                            <input type="checkbox" name="participantes" value="${m.numero}" checked class="w-4 h-4 accent-[#7DE08D]">
+                            <span class="text-sm text-slate-700">${m.nome} <span class="text-slate-400">(equipe)</span></span>
+                        </label>`).join('')}
+                    </div>
+                </div>
+                <button onclick="confirmarGrupo()" class="btn-premium" id="btnConfirmarGrupo" style="background: #16a34a;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Confirmar e Criar Grupo
+                </button>
+            `;
+        }
 
-    // ============================================================
-    // INIT
-    // ============================================================
-    carregarClientes();
-  </script>
+        async function confirmarGrupo() {
+            const btn = document.getElementById('btnConfirmarGrupo');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Criando grupo...';
+
+            const participantes = Array.from(document.querySelectorAll('input[name="participantes"]:checked')).map(el => el.value);
+
+            if (participantes.length === 0) {
+                btn.style.background = '#ef4444';
+                btn.innerHTML = 'Selecione ao menos um participante';
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                const payload = {
+                    ...lastSubmittedData,
+                    participantes: participantes
+                };
+
+                const response = await fetch(WEBHOOK_URL + '-grupo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Erro');
+
+                const container = document.getElementById('grupo-participantes');
+                container.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <p class="text-sm font-semibold text-green-700">Grupo criado com ${participantes.length} participantes!</p>
+                    </div>
+                `;
+            } catch (error) {
+                btn.style.background = '#ef4444';
+                btn.innerHTML = 'Erro ao criar grupo — tente novamente';
+                btn.disabled = false;
+            }
+        }
+
+        function renderError(message) {
+            return `
+                <div class="animate-slide-up">
+                    <div class="glass-card rounded-2xl p-8 md:p-10 text-center">
+                        <div class="success-icon" style="background: #fef2f2;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Erro ao criar setup</h2>
+                        <p class="text-slate-500 mb-6">${message}</p>
+                        <button onclick="carregarClientes()" class="btn-premium">Tentar novamente</button>
+                    </div>
+                </div>`;
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.custom-input').forEach(el => el.classList.remove('error'));
+
+            const clienteIdx = document.getElementById('cliente').value;
+            const cliente = clientes[clienteIdx];
+
+            const data = {
+                // Dados do cliente selecionado
+                clienteNome: cliente.nome,
+                rowNumber: cliente.rowNumber,
+                // Dados operacionais
+                nomeGrupo: document.getElementById('nomeGrupo').value.trim(),
+                tag: document.getElementById('tag').value.trim().toUpperCase(),
+                whatsapp: document.getElementById('whatsapp').value.trim().replace(/\D/g, ''),
+                segmento: document.getElementById('segmento').value,
+                nicho: document.getElementById('nicho').value.trim(),
+                responsavel: document.getElementById('responsavel').value,
+                timestamp: new Date().toISOString()
+            };
+
+            let hasError = false;
+            if (clienteIdx === '' || clienteIdx === null) { showError('cliente'); hasError = true; }
+            if (!data.nomeGrupo) { showError('nomeGrupo'); hasError = true; }
+            if (!data.tag) { showError('tag'); hasError = true; }
+            if (!data.whatsapp || data.whatsapp.length < 12) { showError('whatsapp'); hasError = true; }
+            if (!data.segmento) { showError('segmento'); hasError = true; }
+            if (!data.nicho) { showError('nicho'); hasError = true; }
+            if (!data.responsavel) { showError('responsavel'); hasError = true; }
+
+            if (hasError) return;
+
+            isLoading = true;
+            render();
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('Erro no servidor');
+
+                document.getElementById('app').innerHTML = renderSuccess(data);
+            } catch (error) {
+                document.getElementById('app').innerHTML = renderError('Não foi possível conectar ao servidor. Tente novamente.');
+            }
+
+            isLoading = false;
+        }
+
+        function showError(field) {
+            const el = document.getElementById(field);
+            if (el) el.classList.add('error');
+            const err = document.getElementById(field + '-error');
+            if (err) err.classList.add('show');
+        }
+
+        // Iniciar carregando clientes
+        carregarClientes();
+    </script>
 </body>
 </html>
