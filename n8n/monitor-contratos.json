@@ -1,0 +1,114 @@
+{
+  "name": "Monitor Contratos - Cobrar Pendentes",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "hours", "hoursInterval": 8 }
+          ]
+        }
+      },
+      "id": "schedule",
+      "name": "A cada 8h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.clickup.com/api/v2/list/901109737593/task?statuses[]=pegando%20dados&statuses[]=fazer%20contrato&statuses[]=assinar%20contrato&statuses[]=enviar%20pro%20cliente&statuses[]=esperando%20cliente&statuses[]=em%20alteracao&include_closed=false",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "pk_81520534_M5YUATY3H4HJUXGKIK57N168XKOWUODI" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "buscar-tasks",
+      "name": "Buscar Contratos Pendentes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const tasks = $input.first().json.tasks || [];\nconst agora = Date.now();\nconst atrasados = [];\nconst pendentes = [];\n\nfor (const task of tasks) {\n  const nome = task.name || '';\n  const status = task.status?.status || '';\n  const dueDate = task.due_date ? parseInt(task.due_date) : null;\n  const atrasado = dueDate && dueDate < agora;\n\n  if (atrasado) {\n    atrasados.push('\\u26a0\\ufe0f ' + nome + ' (' + status + ') — *ATRASADO*');\n  } else {\n    pendentes.push('\\ud83d\\udfe1 ' + nome + ' (' + status + ')');\n  }\n}\n\nif (atrasados.length === 0 && pendentes.length === 0) {\n  return [];\n}\n\nlet msg = '\\ud83d\\udccb *Monitor de Contratos*\\n';\n\nif (atrasados.length > 0) {\n  msg += '\\n*Atrasados:*\\n' + atrasados.join('\\n');\n}\n\nif (pendentes.length > 0) {\n  msg += '\\n\\n*Em andamento:*\\n' + pendentes.join('\\n');\n}\n\nreturn [{ json: { msg, temAtrasado: atrasados.length > 0 } }];"
+      },
+      "id": "processar",
+      "name": "Verificar Atrasados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "token", "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: '5521991097451', text: $json.msg }) }}",
+        "options": {}
+      },
+      "id": "avisar-gabriel",
+      "name": "Avisar Gabriel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "token", "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: '5521996393929', text: $json.msg }) }}",
+        "options": {}
+      },
+      "id": "avisar-bruna",
+      "name": "Avisar Bruna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 420]
+    }
+  ],
+  "connections": {
+    "A cada 8h": {
+      "main": [
+        [
+          { "node": "Buscar Contratos Pendentes", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar Contratos Pendentes": {
+      "main": [
+        [
+          { "node": "Verificar Atrasados", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Verificar Atrasados": {
+      "main": [
+        [
+          { "node": "Avisar Gabriel", "type": "main", "index": 0 },
+          { "node": "Avisar Bruna", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
