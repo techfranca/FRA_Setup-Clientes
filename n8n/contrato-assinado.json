@@ -1,0 +1,78 @@
+{
+  "name": "Contrato Assinado - Autentique",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contrato-assinado",
+        "responseMode": "onReceived",
+        "responseCode": 200,
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "webhook-autentique",
+      "name": "Webhook Autentique",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "token", "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: '5521991097451', text: '✅ Contrato assinado!\\n\\nDocumento: ' + ($json.body?.event?.data?.object?.name || $json.event?.data?.object?.name || 'N/A') + '\\n\\nFaça o setup do cliente:\\nhttps://forms-setup-cliente.vercel.app' }) }}",
+        "options": {}
+      },
+      "id": "notificar-gabriel",
+      "name": "Avisar Gabriel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://francaassessoria.uazapi.com/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "token", "value": "0f72dd54-1ddb-4676-be69-9f6aa7370591" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: '120363397740907867@g.us', text: '✅ Contrato assinado!\\n\\nDocumento: ' + ($json.body?.event?.data?.object?.name || $json.event?.data?.object?.name || 'N/A') + '\\n\\nFaça o setup do cliente:\\nhttps://forms-setup-cliente.vercel.app' }) }}",
+        "options": {}
+      },
+      "id": "notificar-grupo",
+      "name": "Avisar Grupo Interno",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Autentique": {
+      "main": [
+        [
+          { "node": "Avisar Gabriel", "type": "main", "index": 0 },
+          { "node": "Avisar Grupo Interno", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
