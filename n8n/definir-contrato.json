@@ -24,7 +24,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://script.google.com/macros/s/AKfycbwaosr5ds6bhK3aoibqVlf-42nEoZdSNNl4tde-oNQEqt1UTMd9l1mEqgDqXtJGIlYf/exec",
+        "url": "https://script.google.com/macros/s/AKfycbxFb3XYYS3n7ZEkMwjxml_ZGgMccWayubvpZqA-vBh6jZfcemNWFj3nnXVaeSkOoJHI/exec",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ (() => { let d = $json.body || $json; if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = {}; } } const nome = (d.card_name || '').replace('Contrato - ', ''); return JSON.stringify({ action: 'definir_contrato', clienteNome: nome, valor: d.valor || '', servicos: Array.isArray(d.servicos) ? d.servicos.join(', ') : (d.servicos || ''), dataPagamento: d.data_pagamento || '' }); })() }}",
