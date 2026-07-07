@@ -1,0 +1,58 @@
+{
+  "name": "Setup Novo Cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "setup-cliente",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "webhook-setup",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbwaosr5ds6bhK3aoibqVlf-42nEoZdSNNl4tde-oNQEqt1UTMd9l1mEqgDqXtJGIlYf/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: 'setup_cliente', rowNumber: $json.body.rowNumber, tag: $json.body.tag, nomeGrupo: $json.body.nomeGrupo, whatsapp: $json.body.whatsapp, segmento: $json.body.segmento, nicho: $json.body.nicho, responsavel: $json.body.responsavel, servicos: Array.isArray($json.body.servicos) ? $json.body.servicos.join(', ') : String($json.body.servicos || '') }) }}",
+        "options": { "redirect": { "redirect": { "followRedirects": false } }, "timeout": 15000 }
+      },
+      "id": "setup-planilhas",
+      "name": "Setup Planilhas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "settings": { "onError": "continueRegularOutput" }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true }) }}"
+      },
+      "id": "responder",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Setup Planilhas", "type": "main", "index": 0 }]] },
+    "Setup Planilhas": { "main": [[{ "node": "Responder", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
