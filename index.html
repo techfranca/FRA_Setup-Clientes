@@ -352,13 +352,19 @@
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner"></div> Criando grupo...';
 
-            const participantes = Array.from(document.querySelectorAll('input[name="participantes"]:checked')).map(el => el.value);
+            const participantesSelecionados = Array.from(document.querySelectorAll('input[name="participantes"]:checked')).map(el => el.value);
 
-            if (participantes.length === 0) {
+            if (participantesSelecionados.length === 0) {
                 btn.style.background = '#ef4444';
                 btn.innerHTML = 'Selecione ao menos um participante';
                 btn.disabled = false;
                 return;
+            }
+
+            // Adiciona FrancaBot automaticamente (pra salvar mensagens)
+            const participantes = [...participantesSelecionados];
+            if (!participantes.includes('5521964579795')) {
+                participantes.push('5521964579795');
             }
 
             try {
