@@ -396,6 +396,18 @@
 
                 if (!response.ok) throw new Error('Erro');
 
+                // Salvar JID na planilha de clientes (direto, sem depender do n8n)
+                try {
+                    const resData = await response.json();
+                    if (resData.success && lastSubmittedData.tag) {
+                        fetch('https://script.google.com/macros/s/AKfycbwm_K6TZhwMx6rz6mio0z90lWrJhQ3TtKX0-13UDdjolNmkTV0qwWjVH5njEWzxe9IlRg/exec', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ tag: lastSubmittedData.tag, column: 'ID Grupo Wpp', value: resData.grupo_jid || '' })
+                        }).catch(() => {});
+                    }
+                } catch(e) {}
+
                 const container = document.getElementById('grupo-participantes');
                 container.innerHTML = `
                     <div class="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
