@@ -222,6 +222,21 @@
                                     <p class="error-msg" id="whatsapp-error">Informe com DDD e país (55)</p>
                                 </div>
 
+                                <div>
+                                    <label>Gênero do cliente <span class="text-red-400">*</span></label>
+                                    <div class="grid grid-cols-2 gap-3 mt-2">
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="radio" name="genero" value="M" class="w-4 h-4 accent-[#7DE08D]" required>
+                                            <span class="text-sm text-slate-700">👨 Homem</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-[#7DE08D] hover:bg-green-50/50 transition-all">
+                                            <input type="radio" name="genero" value="F" class="w-4 h-4 accent-[#7DE08D]" required>
+                                            <span class="text-sm text-slate-700">👩 Mulher</span>
+                                        </label>
+                                    </div>
+                                    <p class="error-msg" id="genero-error">Selecione o gênero</p>
+                                </div>
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
                                         <label for="segmento">Segmento <span class="text-red-400">*</span></label>
@@ -420,6 +435,8 @@
             const clienteIdx = document.getElementById('cliente').value;
             const cliente = clientes[clienteIdx];
 
+            const generoSelecionado = document.querySelector('input[name="genero"]:checked');
+
             const data = {
                 // Dados do cliente selecionado
                 clienteNome: cliente.nome,
@@ -429,6 +446,7 @@
                 nomeGrupo: document.getElementById('nomeGrupo').value.trim(),
                 tag: document.getElementById('tag').value.trim().toUpperCase(),
                 whatsapp: document.getElementById('whatsapp').value.trim().replace(/\D/g, ''),
+                genero: generoSelecionado ? generoSelecionado.value : '',
                 segmento: document.getElementById('segmento').value,
                 nicho: document.getElementById('nicho').value.trim(),
                 responsavel: document.getElementById('responsavel').value,
@@ -440,6 +458,7 @@
             if (!data.nomeGrupo) { showError('nomeGrupo'); hasError = true; }
             if (!data.tag) { showError('tag'); hasError = true; }
             if (!data.whatsapp || data.whatsapp.length < 12) { showError('whatsapp'); hasError = true; }
+            if (!data.genero) { showError('genero'); hasError = true; }
             if (!data.segmento) { showError('segmento'); hasError = true; }
             if (!data.nicho) { showError('nicho'); hasError = true; }
             if (!data.responsavel) { showError('responsavel'); hasError = true; }
