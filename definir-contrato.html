@@ -33,6 +33,37 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
         .spinner-dark { width: 24px; height: 24px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #7DE08D; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 2rem auto; }
+        @keyframes progress-fill {
+            0%   { width: 0%; }
+            15%  { width: 20%; }
+            40%  { width: 45%; }
+            65%  { width: 65%; }
+            80%  { width: 78%; }
+            95%  { width: 92%; }
+            100% { width: 100%; }
+        }
+        @keyframes pulse-dot {
+            0%, 80%, 100% { opacity: .3; transform: scale(.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+        .progress-track {
+            width: 100%; max-width: 320px; height: 6px;
+            background: #e2e8f0; border-radius: 999px; overflow: hidden;
+            margin: 0 auto;
+        }
+        .progress-bar {
+            height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #7DE08D, #39c46a);
+            animation: progress-fill 3.5s cubic-bezier(.16,1,.3,1) forwards;
+            box-shadow: 0 0 12px rgba(125,224,141,.5);
+        }
+        .loading-dots span {
+            display: inline-block; width: 8px; height: 8px;
+            background: #7DE08D; border-radius: 50%;
+            animation: pulse-dot 1.4s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: .16s; }
+        .loading-dots span:nth-child(3) { animation-delay: .32s; }
         .success-icon { width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
         .card-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-top: 0.5rem; }
         .card-info p { font-size: 0.85rem; color: #475569; margin: 0.25rem 0; }
@@ -205,8 +236,9 @@
             if (servicos.length === 0) { showError('servicos'); hasError = true; }
             if (hasError) return;
 
-            isLoading = true;
-            render();
+            // Mostrar tela de loading
+            document.getElementById('app').innerHTML = renderLoading();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             try {
                 // 1. Mover card pra "fazer contrato"
@@ -240,12 +272,15 @@
                     })
                 });
 
-                // 2. Webhook n8n — notificar Bruna
+                // 3. Webhook n8n — notificar Bruna
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(data)
                 }).catch(() => {});
+
+                // Espera a barra de progresso avançar (mínimo 2s)
+                await new Promise(r => setTimeout(r, 2000));
 
                 document.getElementById('app').innerHTML = renderSuccess(data);
             } catch (error) {
@@ -257,6 +292,34 @@
             }
 
             isLoading = false;
+        }
+
+        function renderLoading() {
+            return `
+                <div class="animate-slide-up">
+                    <div class="glass-card rounded-2xl p-8 md:p-10 text-center">
+                        <div class="relative mx-auto mb-8 w-20 h-20">
+                            <div class="absolute inset-0 rounded-full" style="background:#7DE08D;filter:blur(22px);opacity:.4"></div>
+                            <div class="relative w-20 h-20 rounded-full grid place-items-center" style="background:linear-gradient(150deg,#f0fdf4,#fff);border:2px solid #bbf7d0;box-shadow:0 12px 40px -12px rgba(8,21,52,.16)">
+                                <svg class="animate-spin w-9 h-9" style="color:#5ea86a" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold text-slate-800 mb-3">Enviando contrato</h2>
+                        <p class="text-slate-500 mb-8">Atualizando ClickUp e avisando a equipe...</p>
+
+                        <div class="progress-track mb-4">
+                            <div class="progress-bar"></div>
+                        </div>
+
+                        <div class="loading-dots mt-6">
+                            <span></span> <span></span> <span></span>
+                        </div>
+                    </div>
+                </div>`;
         }
 
         function renderSuccess(data) {
